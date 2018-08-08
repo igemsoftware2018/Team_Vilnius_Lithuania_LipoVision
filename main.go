@@ -18,11 +18,7 @@ func main() {
 		panic(err)
 	}
 
-	//backgroundSubtractor := gocv.NewBackgroundSubtractorKNN()
-
 	originalWindow := gocv.NewWindow("Original")
-	//regionWindow := gocv.NewWindow("Region")
-	//regionWindow.ResizeWindow(300, 300)
 
 	regionSet := false
 	var regionRect image.Rectangle
