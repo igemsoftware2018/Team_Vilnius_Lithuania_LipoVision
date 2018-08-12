@@ -2,6 +2,14 @@ language: go
 go:
   - "1.10.3"
 before_install:
+  - sudo apt-get install cmake git build-essential
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
+  - git clone https://github.com/opencv/opencv.git opencv
+  - cd opencv
+  - git checkout 9e1b1e5
+  - mkdir build
+  - cd build
+  - cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release ..
+  - make all
 script: go test ./...

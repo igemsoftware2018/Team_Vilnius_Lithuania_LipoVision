@@ -13,6 +13,7 @@
 
 # No vendoring
 vendor/
+opencv/
 
 # Ignore project exec
 lipovision
