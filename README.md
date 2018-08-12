@@ -8,6 +8,14 @@ Monitor and optimise your liposome microfluidics devices. Vilnius-Lithuania iGEM
 
 
 |Platform|Build Status|
-|--------|------|
+|--------|------------|
 | Linux x64 |[![Build Status](https://travis-ci.org/Vilnius-Lithuania-iGEM-2018/lipovision.svg?branch=master)](https://travis-ci.org/Vilnius-Lithuania-iGEM-2018/lipovision)|
 | Windows |[![Build status](https://ci.appveyor.com/api/projects/status/cbq6uq3iwqhkywwt/branch/master?svg=true)](https://ci.appveyor.com/project/devblok/lipovision/branch/master)|
+
+
+# Setting up build enviroment
+
+- Set up Git (https://git-scm.com)
+- Set up Go (https://golang.org)
+- Set up gocv (https://gocv.io)
+- Optional: Set up VS Code and Go plugin (https://code.visualstudio.com)
