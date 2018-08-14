@@ -38,7 +38,6 @@ addons:
     - libdc1394-22-dev
     - xvfb
     - s3cmd
-    - md5
 before_install:
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
@@ -53,6 +52,6 @@ script: go test ./...
 after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 
   - echo $TRAVIS_COMMIT_RANGE > build/CHANGELOG
   - mkdir pkg
-  - cd pkg && tar -cf ../pkg/lipovision-$PACKAGE_VERSION.tar.gz * && cd .. 
-  - cd pkg && md5sum --tag * > pkg/lipovision-$PACKAGE_VERSION.md5 && cd ..
+  - cd build && tar -cf ../pkg/lipovision-$PACKAGE_VERSION.tar.gz . && cd .. 
+  - cd pkg && md5sum --tag * > lipovision-$PACKAGE_VERSION.md5 && cd ..
   - s3cmd --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT put --recursive pkg s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/
