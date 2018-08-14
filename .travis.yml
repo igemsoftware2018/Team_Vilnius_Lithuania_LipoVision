@@ -54,4 +54,4 @@ after_success: # Compile a list of changes, tarball everything, make md5 and upl
   - mkdir pkg
   - tar -acf build/* pkg/lipovision-$PACKAGE_VERSION.tar.gz
   - md5 -q pkg/lipovision-$PACKAGE_VERSION.tar.gz > pkg/lipovision-$PACKAGE_VERSION.md5
-  - s3cmd put --recursive pkg/* --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/
+  - s3cmd --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT put --recursive pkg/ s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/
