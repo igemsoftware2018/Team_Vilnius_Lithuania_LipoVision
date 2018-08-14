@@ -1,11 +1,22 @@
 language: go
-cache: vendor # Nice to not install and compile OpenCV from zero evry time
+go:
+  - "1.10.3"
+
+sudo: required
+dist: trusty
+
+# Caching so the next build will be fast as possible.
+cache:
+  timeout: 1000
+  directories:
+    - $HOME/usr
+    - $HOME/testdata
+
 env:
   global:
     - PACKAGE_VERSION=0.1.$TRAVIS_BUILD_NUMBER$TRAVIS_TAG # Special builds will have a tag
     - OPENCV_VERSION=3.4.2
-go:
-  - "1.10.3"
+
 addons:
   apt:
     packages:
@@ -31,8 +42,10 @@ before_install:
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
   - GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
+  - export PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config):$HOME/usr/lib/pkgconfig
+  - export INCLUDE_PATH=$HOME/usr/include:${INCLUDE_PATH}
+  - export LD_LIBRARY_PATH=$HOME/usr/lib:${LD_LIBRARY_PATH}
   - mkdir build
-  - export PKG_CONFIG_PATH=$PWD/opencv-$OPENCV_VERSION/unix-install/
   - go build -ldflags '-s -w' -o build/lipovision
   - cp opencv/build/lib/* build/
 script: go test ./...
