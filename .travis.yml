@@ -58,5 +58,5 @@ after_success: # Compile a list of changes, tarball everything, make md5 and upl
   - echo $TRAVIS_COMMIT_RANGE > build/CHANGELOG
   - mkdir pkg
   - cd build && tar -cf ../pkg/lipovision-$PACKAGE_VERSION.tar.gz . && cd .. 
-  - cd pkg && md5sum --tag * > lipovision-$PACKAGE_VERSION.md5 && cat lipovision-$PACKAGE_VERSION.md5 && cd ..
-  - s3cmd put --recursive pkg s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/ --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT
+  - cd pkg && md5sum --tag * > lipovision-$PACKAGE_VERSION.md5 && cat lipovision-$PACKAGE_VERSION.md5
+  - s3cmd put * s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/ --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT
