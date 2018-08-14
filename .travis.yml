@@ -1,19 +1,23 @@
 language: go
+env:
+  global:
+    - PACKAGE_VERSION=0.1.$TRAVIS_BUILD_NUMBER$TRAVIS_TAG
 go:
   - "1.10.3"
 before_install:
-  - sudo apt-get install cmake git build-essential
+  - sudo apt-get install cmake git build-essential s3cmd
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
-  - git clone https://github.com/opencv/opencv.git opencv
-  - cd opencv
-  - git checkout 9e1b1e5
+  - vendor/gocv.io/x/gocv/travis_build_opencv.sh
   - mkdir build
-  - cd build
-  - cmake -DBUILD_SHARED_LIBS=OFF -DENABLE_CXX11=ON -DWITH_IPP=OFF -DWITH_MSMF=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_opencv_java=OFF -DBUILD_opencv_python=OFF -DBUILD_opencv_python2=OFF -DBUILD_opencv_python3=OFF -DBUILD_DOCS=OFF -DENABLE_PRECOMPILED_HEADERS=OFF -DBUILD_opencv_saliency=OFF -DCPU_DISPATCH= -Wno-dev ..
-  - make all
-  - cd ../..
-  - mkdir build
-  - go build -ldflags '-extldflags "-L./opencv/build/libs"' -o build/lipovision
+  - go build -ldflags '-s -w -extldflags "-L./opencv/build/lib"' -o build/lipovision
   - cp opencv/build/lib/* build/
 script: go test ./...
+after_success:
+  - echo $TRAVIS_COMMIT_RANGE > build/CHANGELOG
+  - mkdir pkg
+  - tar -acf build/* pkg/lipovision-$PACKAGE_VERSION.tar.gz
+before_deploy:
+  - md5 -q pkg/lipovision-$PACKAGE_VERSION.tar.gz > pkg/lipovision-$PACKAGE_VERSION.md5
+deploy:
+  - s3cmd put --recursive pkg/* --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/
