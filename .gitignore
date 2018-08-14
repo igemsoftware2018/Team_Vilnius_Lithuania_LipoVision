@@ -17,3 +17,6 @@ opencv/
 
 # Ignore project exec
 lipovision
+
+# Ignore vscode (for now)
+.vscode
