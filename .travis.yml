@@ -32,12 +32,8 @@ before_install:
   - dep ensure
   - GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
   - mkdir build
-  - ls -lah
-  - ls -lah open*/
-  - ls -lah vendor/gocv.io/x/gocv/
-  - PKG_CONFIG_PATH=opencv-$OPENCV_VERSION/unix-install/ pkg-config --cflags opencv
-  - PKG_CONFIG_PATH=opencv-$OPENCV_VERSION/unix-install/ pkg-config --static opencv
-  - PKG_CONFIG_PATH=opencv-$OPENCV_VERSION/unix-install/ go build -ldflags '-s -w' -o build/lipovision
+  - export PKG_CONFIG_PATH=opencv-$OPENCV_VERSION/unix-install/
+  - go build -ldflags '-s -w' -o build/lipovision
   - cp opencv/build/lib/* build/
 script: go test ./...
 after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 
