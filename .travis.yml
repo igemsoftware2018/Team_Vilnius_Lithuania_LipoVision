@@ -1,7 +1,8 @@
 language: go
+cache: vendor # Nice to not install and compile OpenCV from zero evry time
 env:
   global:
-    - PACKAGE_VERSION=0.1.$TRAVIS_BUILD_NUMBER$TRAVIS_TAG
+    - PACKAGE_VERSION=0.1.$TRAVIS_BUILD_NUMBER$TRAVIS_TAG # Special builds will have a tag
 go:
   - "1.10.3"
 before_install:
@@ -13,7 +14,7 @@ before_install:
   - go build -ldflags '-s -w -extldflags "-L./opencv/build/lib"' -o build/lipovision
   - cp opencv/build/lib/* build/
 script: go test ./...
-after_success:
+after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 
   - echo $TRAVIS_COMMIT_RANGE > build/CHANGELOG
   - mkdir pkg
   - tar -acf build/* pkg/lipovision-$PACKAGE_VERSION.tar.gz
