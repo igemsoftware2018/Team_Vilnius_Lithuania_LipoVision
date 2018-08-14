@@ -11,7 +11,7 @@ before_install:
   - dep ensure
   - GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
   - mkdir build
-  - go build -ldflags '-s -w -extldflags "-L./opencv/build/lib"' -o build/lipovision
+  - go build -ldflags '-s -w' -o build/lipovision
   - cp opencv/build/lib/* build/
 script: go test ./...
 after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 
