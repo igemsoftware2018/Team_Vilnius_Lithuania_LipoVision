@@ -39,9 +39,9 @@ addons:
     - xvfb
     - python-setuptools
 before_install:
-  - wget http://netix.dl.sourceforge.net/project/s3tools/s3cmd/1.6.0/s3cmd-1.6.0.tar.gz
-  - tar xvfz s3cmd-1.6.0.tar.gz
-  - cd s3cmd-1.6.0
+  - wget http://netix.dl.sourceforge.net/project/s3tools/s3cmd/2.0.2/s3cmd-2.0.2.tar.gz
+  - tar xvfz s3cmd-2.0.2.tar.gz
+  - cd s3cmd-2.0.2
   - sudo python setup.py install
   - cd ..
   - go get -u github.com/golang/dep/cmd/dep
