@@ -5,11 +5,31 @@ env:
     - PACKAGE_VERSION=0.1.$TRAVIS_BUILD_NUMBER$TRAVIS_TAG # Special builds will have a tag
 go:
   - "1.10.3"
+addons:
+  apt:
+    packages:
+    - libgmp-dev
+    - build-essential
+    - cmake
+    - git
+    - libgtk2.0-dev
+    - pkg-config
+    - libavcodec-dev
+    - libavformat-dev
+    - libswscale-dev
+    - libtbb2
+    - libtbb-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libtiff-dev
+    - libjasper-dev
+    - libdc1394-22-dev
+    - xvfb
+    - s3cmd
 before_install:
-  - sudo apt-get install cmake git build-essential s3cmd
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
-  - sudo GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
+  - GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
   - mkdir build
   - ls -lah
   - ls -lah open*/
