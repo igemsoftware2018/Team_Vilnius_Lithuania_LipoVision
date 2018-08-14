@@ -3,6 +3,7 @@ cache: vendor # Nice to not install and compile OpenCV from zero evry time
 env:
   global:
     - PACKAGE_VERSION=0.1.$TRAVIS_BUILD_NUMBER$TRAVIS_TAG # Special builds will have a tag
+    - OPENCV_VERSION=3.4.2
 go:
   - "1.10.3"
 addons:
@@ -34,8 +35,9 @@ before_install:
   - ls -lah
   - ls -lah open*/
   - ls -lah vendor/gocv.io/x/gocv/
-  - pkg-config --cflags opencv
-  - go build -ldflags '-s -w' -o build/lipovision
+  - PKG_CONFIG_PATH=opencv-$OPENCV_VERSION/unix-install/ pkg-config --cflags opencv
+  - PKG_CONFIG_PATH=opencv-$OPENCV_VERSION/unix-install/ pkg-config --static opencv
+  - PKG_CONFIG_PATH=opencv-$OPENCV_VERSION/unix-install/ go build -ldflags '-s -w' -o build/lipovision
   - cp opencv/build/lib/* build/
 script: go test ./...
 after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 
