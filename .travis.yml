@@ -17,7 +17,5 @@ after_success:
   - echo $TRAVIS_COMMIT_RANGE > build/CHANGELOG
   - mkdir pkg
   - tar -acf build/* pkg/lipovision-$PACKAGE_VERSION.tar.gz
-before_deploy:
   - md5 -q pkg/lipovision-$PACKAGE_VERSION.tar.gz > pkg/lipovision-$PACKAGE_VERSION.md5
-deploy:
   - s3cmd put --recursive pkg/* --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/
