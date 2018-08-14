@@ -47,7 +47,7 @@ before_install:
   - export LD_LIBRARY_PATH=$HOME/usr/lib:${LD_LIBRARY_PATH}
   - mkdir build
   - go build -ldflags '-s -w' -o build/lipovision
-  - cp opencv/build/lib/* build/
+  - cp ~/usr/lib/* build/
 script: go test ./...
 after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 
   - echo $TRAVIS_COMMIT_RANGE > build/CHANGELOG
