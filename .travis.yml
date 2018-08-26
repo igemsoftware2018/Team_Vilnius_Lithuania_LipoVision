@@ -5,6 +5,10 @@ go:
 sudo: required
 dist: trusty
 
+os:
+  - linux
+  - osx
+
 # Caching so the next build will be fast as possible.
 cache:
   timeout: 1000
