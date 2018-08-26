@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"os"
@@ -11,19 +10,15 @@ import (
 
 func main() {
 
-	// Fetching required input data
 	capture := captureVideo(os.Args[1])
 	var template = templateFetch()
 
-	// Create basic original window
 	originalWindow := gocv.NewWindow("Original")
 
-	// Matching region detection variables
 	regionSet := false
 	var regionRect image.Rectangle
 	var rectangleColor = color.RGBA{255, 255, 255, 0}
 
-	// Object for Background Subtraction
 	var fgbg = gocv.NewBackgroundSubtractorKNN()
 
 	cancelled := false
@@ -43,22 +38,14 @@ func main() {
 
 		if !regionSet {
 			regionResult := gocv.NewMat()
-			templateDims := template.Size()
-			gocv.MatchTemplate(frame, template, &regionResult, gocv.TmCcoeff, gocv.NewMat())
-			_, _, _, maxLoc := gocv.MinMaxLoc(regionResult)
-			fmt.Printf("Region found: [%d, %d]\n", maxLoc.X, maxLoc.Y)
-			regionRect.Min = maxLoc
-			regionRect.Max = image.Point{X: maxLoc.X + templateDims[0], Y: maxLoc.Y + templateDims[1]}
+			machRegionOfInterest(&regionResult, &frame, &template, &regionRect)
 		} else {
 			cropped := frame.Region(regionRect)
 			croppedWindow := gocv.NewWindow("Cropped")
 
-			frameForSubtraction := frameOriginal.Region(regionRect)
-			fgbg.Apply(frameForSubtraction, &frameForSubtraction)
-			gocv.Threshold(frameForSubtraction, &frameForSubtraction, 125, 255, gocv.ThresholdBinary)
+			frameForSubtraction := subtractBackground(&frameOriginal, &regionRect, &fgbg)
 
 			removeMovingNoisePixels(frameCount, &previousFrame, &frame)
-			removeBorderPixelNoise(&cropped)
 			findVerticalElements(&cropped)
 
 			gocv.CvtColor(cropped, &cropped, gocv.ColorBGRToGray)

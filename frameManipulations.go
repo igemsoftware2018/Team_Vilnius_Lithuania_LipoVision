@@ -17,18 +17,6 @@ func removeMovingNoisePixels(frameCount int, previousFrame *gocv.Mat, frame *goc
 	}
 }
 
-// Remove border white pixels noise
-func removeBorderPixelNoise(cropped *gocv.Mat) {
-	for i := 0; i < cropped.Rows(); i++ {
-		for j := 0; j < cropped.Cols(); j++ {
-			if i == 0 || j == 0 || i == 1 || j == 1 || i == cropped.Rows()-1 || j == cropped.Cols()-1 {
-				cropped.SetUCharAt(i, j, 0)
-			}
-
-		}
-	}
-}
-
 // Finds only vertical elements in the frame
 func findVerticalElements(cropped *gocv.Mat) {
 	gocv.CvtColor(*cropped, cropped, gocv.ColorGrayToBGR)
@@ -89,4 +77,19 @@ func isDanger(cropped gocv.Mat, biggestX int) (isDanger bool) {
 	}
 	return
 
+}
+
+func machRegionOfInterest(regionResult *gocv.Mat, frame *gocv.Mat, template *gocv.Mat, regionRect *image.Rectangle) {
+	templateDims := template.Size()
+	gocv.MatchTemplate(*frame, *template, regionResult, gocv.TmCcoeff, gocv.NewMat())
+	_, _, _, maxLoc := gocv.MinMaxLoc(*regionResult)
+	regionRect.Min = maxLoc
+	regionRect.Max = image.Point{X: maxLoc.X + templateDims[0], Y: maxLoc.Y + templateDims[1]}
+}
+
+func subtractBackground(frameOriginal *gocv.Mat, regionRect *image.Rectangle, fgbg *gocv.BackgroundSubtractorKNN) gocv.Mat {
+	frameForSubtraction := frameOriginal.Region(*regionRect)
+	fgbg.Apply(frameForSubtraction, &frameForSubtraction)
+	gocv.Threshold(frameForSubtraction, &frameForSubtraction, 125, 255, gocv.ThresholdBinary)
+	return frameForSubtraction
 }
