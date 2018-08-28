@@ -5,6 +5,10 @@ go:
 sudo: required
 dist: trusty
 
+os:
+  - linux
+  - osx
+
 # Caching so the next build will be fast as possible.
 cache:
   timeout: 1000
@@ -39,11 +43,7 @@ addons:
     - xvfb
     - python-setuptools
 before_install:
-  - wget http://netix.dl.sourceforge.net/project/s3tools/s3cmd/2.0.2/s3cmd-2.0.2.tar.gz
-  - tar xvfz s3cmd-2.0.2.tar.gz
-  - cd s3cmd-2.0.2
-  - sudo python setup.py install
-  - cd ..
+  - bash .travis/before_install.sh
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
   - GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
