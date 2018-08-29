@@ -1,19 +1,62 @@
 language: go
 go:
   - "1.10.3"
+
+sudo: required
+dist: trusty
+
+os:
+  - linux
+  - osx
+
+# Caching so the next build will be fast as possible.
+cache:
+  timeout: 1000
+  directories:
+    - $HOME/usr
+    - $HOME/testdata
+
+env:
+  global:
+    - PACKAGE_VERSION=0.1.$TRAVIS_BUILD_NUMBER$TRAVIS_TAG # Special builds will have a tag
+    - OPENCV_VERSION=3.4.2
+
+addons:
+  apt:
+    packages:
+    - libgmp-dev
+    - build-essential
+    - cmake
+    - git
+    - libgtk2.0-dev
+    - pkg-config
+    - libavcodec-dev
+    - libavformat-dev
+    - libswscale-dev
+    - libtbb2
+    - libtbb-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libtiff-dev
+    - libjasper-dev
+    - libdc1394-22-dev
+    - xvfb
+    - python-setuptools
 before_install:
-  - sudo apt-get install cmake git build-essential
+  - bash .travis/before_install.sh
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
-  - git clone https://github.com/opencv/opencv.git opencv
-  - cd opencv
-  - git checkout 9e1b1e5
+  - GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
+  - export PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config):$HOME/usr/lib/pkgconfig
+  - export INCLUDE_PATH=$HOME/usr/include:${INCLUDE_PATH}
+  - export LD_LIBRARY_PATH=$HOME/usr/lib:${LD_LIBRARY_PATH}
   - mkdir build
-  - cd build
-  - cmake -DBUILD_SHARED_LIBS=OFF -DENABLE_CXX11=ON -DWITH_IPP=OFF -DWITH_MSMF=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_opencv_java=OFF -DBUILD_opencv_python=OFF -DBUILD_opencv_python2=OFF -DBUILD_opencv_python3=OFF -DBUILD_DOCS=OFF -DENABLE_PRECOMPILED_HEADERS=OFF -DBUILD_opencv_saliency=OFF -DCPU_DISPATCH= -Wno-dev ..
-  - make all
-  - cd ../..
-  - mkdir build
-  - go build -ldflags '-extldflags "-L./opencv/build/libs"' -o build/lipovision
-  - cp opencv/build/lib/* build/
+  - go build -ldflags '-s -w' -o build/lipovision
+  - cp $HOME/usr/lib/libopencv* build/
 script: go test ./...
+after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 
+  - echo $TRAVIS_COMMIT_RANGE > build/CHANGELOG
+  - mkdir lipovision-$PACKAGE_VERSION
+  - cd build && tar -cf ../lipovision-$PACKAGE_VERSION/lipovision-$PACKAGE_VERSION.tar.gz . && cd .. 
+  - cd lipovision-$PACKAGE_VERSION && md5sum --tag * > lipovision-$PACKAGE_VERSION.md5 && cat lipovision-$PACKAGE_VERSION.md5
+  - s3cmd put --recursive . s3://$SPACES_BUCKET/$TRAVIS_OS_NAME/lipovision-$PACKAGE_VERSION/ --access_key=$SPACES_ACCESS_KEY --secret_key=$SPACES_SECRET_KEY --host=$SPACES_ENDPOINT --host-bucket=$SPACES_BUCKET.$SPACES_ENDPOINT

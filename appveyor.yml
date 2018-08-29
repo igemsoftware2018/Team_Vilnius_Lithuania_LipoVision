@@ -1,5 +1,9 @@
 version: "0.1.{build}"
 
+skip_branch_with_pr: true
+clone_depth: 1
+clone_folder: C:/gopath/src/github.com/Vilnius-Lithuania-iGEM-2018/lipovision
+
 platform:
   - MinGW_x64
 
@@ -17,7 +21,10 @@ install:
   - rmdir %GOROOT% /s /q
   - appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-amd64.msi
   - msiexec /i go%GOVERSION%.windows-amd64.msi /q
-  - if not exist "C:\opencv" vendor/gocv.io/x/gocv/appveyor_build_opencv.cmd
+  - set PATH=%PATH%;%GOPATH%\bin
+  - go get -u github.com/golang/dep/cmd/dep
+  - dep ensure
+  - if not exist "C:\opencv" "vendor/gocv.io/x/gocv/appveyor_build_opencv.cmd"
   - set PATH=C:\Perl\site\bin;C:\Perl\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft\Web Platform Installer\;C:\Tools\PsTools;C:\Program Files (x86)\CMake\bin;C:\go\bin;C:\Tools\NuGet;C:\Program Files\LLVM\bin;C:\Tools\curl\bin;C:\ProgramData\chocolatey\bin;C:\Program Files (x86)\Yarn\bin;C:\Users\appveyor\AppData\Local\Yarn\bin;C:\Program Files\AppVeyor\BuildAgent\
   - set PATH=%PATH%;C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
   - set PATH=%PATH%;C:\Tools\GitVersion;C:\Program Files\Git LFS;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\opencv\build\install\x64\mingw\bin;
@@ -31,8 +38,9 @@ install:
 build_script:
   - go test ./...
   - mkdir build
-  - go build -ldflags '-s -w' -o build/lipovision.exe
-  - xcopy /s C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin build/
+  - mkdir pkg
+  - go build -o build/lipovision.exe
+  - robocopy C:/opencv/build/install/x64/mingw/lib/ build/ ^ 3
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
   - PowerShell -Command "& Get-FileHash pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip -Algorithm MD5 > pkg/lipovision-%APPVEYOR_BUILD_VERSION%.md5"
 
