@@ -46,7 +46,7 @@ before_install:
   - bash .travis/before_install.sh
   - go get -u github.com/golang/dep/cmd/dep
   - dep ensure
-  - GRAPHICAL=ON vendor/gocv.io/x/gocv/travis_build_opencv.sh
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then; GRAPHICAL=ON .travis/travis_build_osx.sh; else; GRAPHICAL=ON .travis/travis_build_linux.sh fi
   - export PKG_CONFIG_PATH=$(pkg-config --variable pc_path pkg-config):$HOME/usr/lib/pkgconfig
   - export INCLUDE_PATH=$HOME/usr/include:${INCLUDE_PATH}
   - export LD_LIBRARY_PATH=$HOME/usr/lib:${LD_LIBRARY_PATH}
