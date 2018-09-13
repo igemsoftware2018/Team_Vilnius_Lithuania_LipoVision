@@ -6,7 +6,7 @@ import "context"
 type Processor interface {
 
 	//Process Performs a process operation on channel items
-	Process(queue <-chan struct{}) error
+	Process(<-chan struct{})
 
 	//WithContext Sets a Context for the process to cancel on
 	WithContext(context.Context) Processor

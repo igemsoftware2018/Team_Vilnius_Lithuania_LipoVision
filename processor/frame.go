@@ -17,12 +17,12 @@ type FrameProcessor struct {
 }
 
 //Process Processes a stream of frames coming from a device
-func (fp FrameProcessor) Process(frames <-chan device.Frame) error {
+func (fp FrameProcessor) Process(frames <-chan device.Frame) {
 	for frame := range frames {
 		select {
 		// If Process is cancelled, exit with error
 		case <-fp.context.Done():
-			return fp.context.Err()
+			return
 
 		// If Frame is cancelled, log and skip
 		case <-frame.SkippedFrame():
@@ -33,7 +33,6 @@ func (fp FrameProcessor) Process(frames <-chan device.Frame) error {
 		// Do Frame processing here (move to unexported function preferably)
 		// Needed initialization to be done in CreateFrameProcessor, held in struct itself
 	}
-	return nil
 }
 
 //WithContext Allows to set a Context for the Processsor
