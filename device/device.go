@@ -17,7 +17,7 @@ func (f Frame) Frame() interface{} {
 
 //SkippedFrame Exposes innner context Done()
 //Which basically means that the frame should be skipped
-func (f Frame) SkippedFrame() <-chan struct{} {
+func (f Frame) Skip() <-chan struct{} {
 	return f.ctx.Done()
 }
 
