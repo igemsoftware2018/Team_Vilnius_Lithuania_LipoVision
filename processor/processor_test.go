@@ -14,8 +14,8 @@ type intProcessor struct {
 	ctx context.Context
 }
 
-func (ip intProcessor) Process(queue <-chan int) error {
-	for item := range queue {
+func (ip intProcessor) Process(queue <-chan int) {
+	for index := range queue {
 		select {
 		case <-ip.ctx.Done():
 			return
@@ -23,6 +23,7 @@ func (ip intProcessor) Process(queue <-chan int) error {
 		}
 
 		// Do something
+		index = index + 1
 	}
 }
 

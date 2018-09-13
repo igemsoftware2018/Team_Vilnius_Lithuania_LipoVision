@@ -25,7 +25,7 @@ func (fp FrameProcessor) Process(frames <-chan device.Frame) {
 			return
 
 		// If Frame is cancelled, log and skip
-		case <-frame.SkippedFrame():
+		case <-frame.Skip():
 			fmt.Printf("%s", "Skipped frame")
 			continue
 		}
