@@ -15,6 +15,7 @@ func CreateVerticalFilter() Vertical {
 type Vertical struct {
 }
 
+//Apply Applies vertical element filter to frame
 func (vf Vertical) Apply(frame *gocv.Mat) error {
 	var verticalsize = frame.Rows() / 5
 	verticalStructure := gocv.GetStructuringElement(0, image.Pt(1, verticalsize))
@@ -24,7 +25,7 @@ func (vf Vertical) Apply(frame *gocv.Mat) error {
 	return nil
 }
 
-//Produce Finds only vertical elements in the frame
+//Produce Produces a frame with vertical line filter applied
 func (vf Vertical) Produce(frame gocv.Mat) (gocv.Mat, error) {
 	resultingFrame := frame.Clone()
 	err := vf.Apply(&resultingFrame)

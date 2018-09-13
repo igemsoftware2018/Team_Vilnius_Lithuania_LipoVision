@@ -14,6 +14,7 @@ type Noise struct {
 	referenceFrame *gocv.Mat
 }
 
+//Apply Applies noise reduction to frame
 func (nf Noise) Apply(frame *gocv.Mat) error {
 	for i := 0; i < frame.Rows(); i++ {
 		for j := 0; j < frame.Cols(); j++ {
@@ -25,7 +26,7 @@ func (nf Noise) Apply(frame *gocv.Mat) error {
 	return nil
 }
 
-//Produce Comparison with previous frame for moving pixels detection and removal
+//Produce Produces new frame with noise reduced
 func (nf Noise) Produce(frame gocv.Mat) (gocv.Mat, error) {
 	resultingFrame := frame.Clone()
 	err := nf.Apply(&resultingFrame)

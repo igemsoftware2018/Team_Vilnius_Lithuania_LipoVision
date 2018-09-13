@@ -10,6 +10,7 @@ func CreateLineApplyFilter() LineApply {
 type LineApply struct {
 }
 
+//Apply Applies white lines to frame
 func (la LineApply) Apply(frame *gocv.Mat) error {
 	for i := 0; i < frame.Cols(); i++ {
 		for j := 0; j < frame.Rows(); j++ {
@@ -23,6 +24,7 @@ func (la LineApply) Apply(frame *gocv.Mat) error {
 	return nil
 }
 
+//Produce Creates new frame with lines applied
 func (la LineApply) Produce(frame gocv.Mat) (gocv.Mat, error) {
 	resultFrame := frame.Clone()
 	err := la.Apply(&resultFrame)
