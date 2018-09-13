@@ -4,14 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"gocv.io/x/gocv"
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 )
-
-// This will be in the device package, since the device owns the stream and sets the context
-type Frame struct {
-	frame gocv.Mat
-	ctx   context.Context
-}
 
 func CreateFrameProcessor() FrameProcessor {
 	return FrameProcessor{context: context.Background()} // Default context must be Background(), WithContext() sets an optional context
@@ -23,7 +17,7 @@ type FrameProcessor struct {
 }
 
 //Process Processes a stream of frames coming from a device
-func (fp FrameProcessor) Process(frames <-chan Frame) error {
+func (fp FrameProcessor) Process(frames <-chan device.Frame) error {
 	for frame := range frames {
 		select {
 		// If Process is cancelled, exit with error
@@ -31,8 +25,8 @@ func (fp FrameProcessor) Process(frames <-chan Frame) error {
 			return fp.context.Err()
 
 		// If Frame is cancelled, log and skip
-		case <-frame.ctx.Done():
-			fmt.Printf("%s", frame.ctx.Err())
+		case <-frame.SkippedFrame():
+			fmt.Printf("%s", "Skipped frame")
 			continue
 		}
 
