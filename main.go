@@ -44,6 +44,7 @@ func main() {
 		filter.CreateLineApplyFilter(),
 	}
 
+	regionSet := false
 	cancelled := false
 	for !cancelled {
 		// frame is the original, has to represent the original,
@@ -55,9 +56,11 @@ func main() {
 		}
 
 		gocv.CvtColor(frame, &frame, gocv.ColorBGRToGray)
+
+		originalFrame := frame.Clone()
+
 		gocv.Threshold(frame, &frame, 125, 255, gocv.ThresholdBinaryInv)
 
-		regionSet := false
 		if !regionSet {
 			regionResult := gocv.NewMat()
 			machRegionOfInterest(&regionResult, &frame, &template, &regionRect)
@@ -71,17 +74,22 @@ func main() {
 				break
 			}
 
-			cropped := frame.Region(regionRect)
-			gocv.CvtColor(cropped, &cropped, gocv.ColorBGRToGray)
+			cropped := originalFrame.Region(regionRect)
+			croppedForAdd := originalFrame.Region(regionRect)
+			gocv.CvtColor(croppedForAdd, &croppedForAdd, gocv.ColorGrayToBGR)
 			err = filter.ApplyFilters(&cropped, regionFilters)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				break
 			}
 
+			// Left in case of debugging for now
+			// fmt.Printf("Cropped Rows: %d, cols, %d, Type: %s\n", cropped.Rows(), cropped.Cols(), cropped.Type())
+			// fmt.Printf("CroppedForAdd Rows: %d, cols, %d, Type: %s\n", croppedForAdd.Rows(), croppedForAdd.Cols(), croppedForAdd.Type())
+
 			biggestX := findBiggestXOfWhitePixel(&cropped)
 			// Merge vertical line frame + Subtracted moving bubble frame
-			gocv.AddWeighted(cropped, 1, manipulatedFrame, 1, 0, &cropped)
+			gocv.AddWeighted(cropped, 1, croppedForAdd, 1, 0, &cropped)
 
 			if isDanger(cropped, biggestX) {
 				gocv.PutText(&cropped, "DANGER!", image.Pt(cropped.Cols()/8, cropped.Rows()/4*3), 0, 0.3, color.RGBA{255, 255, 255, 9}, 1)
