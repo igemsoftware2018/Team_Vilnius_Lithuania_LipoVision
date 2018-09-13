@@ -16,8 +16,6 @@ type Vertical struct {
 }
 
 func (vf Vertical) Apply(frame *gocv.Mat) error {
-	gocv.CvtColor(*frame, frame, gocv.ColorGrayToBGR)
-
 	var verticalsize = frame.Rows() / 5
 	verticalStructure := gocv.GetStructuringElement(0, image.Pt(1, verticalsize))
 	gocv.Erode(*frame, frame, verticalStructure)

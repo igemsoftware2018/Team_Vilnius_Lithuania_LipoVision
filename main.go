@@ -76,7 +76,8 @@ func main() {
 
 			cropped := originalFrame.Region(regionRect)
 			croppedForAdd := originalFrame.Region(regionRect)
-			gocv.CvtColor(croppedForAdd, &croppedForAdd, gocv.ColorGrayToBGR)
+			// Origginally conversion was into this type
+			// gocv.CvtColor(*frame, frame, gocv.ColorGrayToBGR)
 			err = filter.ApplyFilters(&cropped, regionFilters)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
