@@ -2,18 +2,16 @@ package device
 
 import (
 	"context"
-
-	"gocv.io/x/gocv"
 )
 
 //Frame Defines a frame structure that is a part of the stream
 type Frame struct {
-	frame gocv.Mat
+	frame interface{}
 	ctx   context.Context
 }
 
 //Frame Gets the underlying frame
-func (f Frame) Frame() gocv.Mat {
+func (f Frame) Frame() interface{} {
 	return f.frame
 }
 
