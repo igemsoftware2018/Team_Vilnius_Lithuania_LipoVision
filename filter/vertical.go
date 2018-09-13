@@ -11,7 +11,7 @@ func CreateVerticalFilter() Vertical {
 	return Vertical{}
 }
 
-//VerticalFilter Finds vertical element of a a frame
+//Vertical Finds vertical element of a a frame
 type Vertical struct {
 }
 

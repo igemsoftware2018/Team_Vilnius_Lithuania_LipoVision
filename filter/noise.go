@@ -7,7 +7,7 @@ func CreateNoiseFilter(referenceFrame *gocv.Mat, frameNumber *int) Noise {
 	return Noise{frameNumber: frameNumber, referenceFrame: referenceFrame}
 }
 
-//NoiseFilter Removes moving noise pixels,
+//Noise Removes moving noise pixels,
 //Should ease detection
 type Noise struct {
 	frameNumber    *int

@@ -6,6 +6,7 @@ import (
 	"gocv.io/x/gocv"
 )
 
+//CreateSubtractFilter Creates subtract filter with settings
 func CreateSubtractFilter(region *image.Rectangle) Subtract {
 	return Subtract{
 		region:     region,

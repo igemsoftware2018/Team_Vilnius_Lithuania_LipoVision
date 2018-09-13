@@ -2,6 +2,7 @@ package filter
 
 import "gocv.io/x/gocv"
 
+//CreateLineApplyFilter Creates LineApply filter with settings
 func CreateLineApplyFilter() LineApply {
 	return LineApply{}
 }
