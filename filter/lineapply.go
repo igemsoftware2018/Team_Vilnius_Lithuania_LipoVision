@@ -25,14 +25,6 @@ func (la LineApply) Apply(frame *gocv.Mat) error {
 
 func (la LineApply) Produce(frame gocv.Mat) (gocv.Mat, error) {
 	resultFrame := frame.Clone()
-	for i := 0; i < frame.Cols(); i++ {
-		for j := 0; j < frame.Rows(); j++ {
-			if frame.GetUCharAt(j, i) == 255 {
-				for k := 0; k < frame.Rows(); k++ {
-					resultFrame.SetUCharAt(k, i, 255)
-				}
-			}
-		}
-	}
-	return resultFrame, nil
+	err := la.Apply(&resultFrame)
+	return resultFrame, err
 }

@@ -21,9 +21,8 @@ type Subtract struct {
 
 func (s Subtract) Produce(frame gocv.Mat) (gocv.Mat, error) {
 	resultingFrame := frame.Region(*s.region)
-	s.subtractor.Apply(frame, &resultingFrame)
-	gocv.Threshold(resultingFrame, &resultingFrame, 125, 255, gocv.ThresholdBinary)
-	return resultingFrame, nil
+	err := s.Apply(&resultingFrame)
+	return resultingFrame, err
 }
 
 func (s Subtract) Apply(frame *gocv.Mat) error {

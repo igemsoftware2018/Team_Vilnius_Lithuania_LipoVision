@@ -28,12 +28,6 @@ func (nf Noise) Apply(frame *gocv.Mat) error {
 //Produce Comparison with previous frame for moving pixels detection and removal
 func (nf Noise) Produce(frame gocv.Mat) (gocv.Mat, error) {
 	resultingFrame := frame.Clone()
-	for i := 0; i < frame.Rows(); i++ {
-		for j := 0; j < frame.Cols(); j++ {
-			if *nf.frameNumber > 0 && nf.referenceFrame.GetUCharAt(i, j) != frame.GetUCharAt(i, j) {
-				resultingFrame.SetUCharAt(i, j, 0)
-			}
-		}
-	}
-	return resultingFrame, nil
+	err := nf.Apply(&resultingFrame)
+	return resultingFrame, err
 }
