@@ -30,7 +30,7 @@ func (intProducingDevice) Available() bool {
 
 // Must return frames in order and manipulated
 func TestGettingFrames(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	device := intProducingDevice{itemSleepTime: 5 * time.Millisecond}
 
 	stream := device.Stream(ctx)
@@ -53,7 +53,7 @@ func TestGettingFrames(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(time.Second / 2)
+	time.Sleep(300 * time.Millisecond)
 
 	select {
 	case <-ctx.Done():
@@ -66,7 +66,7 @@ func TestGettingFrames(t *testing.T) {
 
 // Must skip frames
 func TestSkippingFrames(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	device := intProducingDevice{itemSleepTime: 5 * time.Millisecond}
 
 	stream := device.Stream(ctx)
