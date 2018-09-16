@@ -10,12 +10,12 @@ type Frame struct {
 	ctx   context.Context
 }
 
-//Frame Gets the underlying frame
-func (f Frame) Frame() interface{} {
+// GetFrame gets underlying Frame
+func (f Frame) GetFrame() interface{} {
 	return f.frame
 }
 
-//SkippedFrame Exposes innner context Done()
+//Skip Exposes innner context Done()
 //Which basically means that the frame should be skipped
 func (f Frame) Skip() <-chan struct{} {
 	return f.ctx.Done()

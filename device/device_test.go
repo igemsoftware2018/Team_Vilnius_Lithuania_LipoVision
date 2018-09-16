@@ -46,7 +46,7 @@ func TestGettingFrames(t *testing.T) {
 			default:
 			}
 
-			if item.Frame().(int) != streamIndex+1 {
+			if item.GetFrame().(int) != streamIndex+1 {
 				t.Errorf("Process failed manipulation with: %d", streamIndex+1)
 			}
 			streamIndex = streamIndex + 1
