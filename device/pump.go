@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -31,48 +32,123 @@ type pump struct {
 	Rate          float64 `json:"rate"`
 	Stalled       bool    `json:"stalled"`
 	Force         int     `json:"force"`
+	initialized   bool    `json:"-"`
 }
 
-type refreshRequestBody struct {
-	Par  string `json:"par"`
-	Pump int    `json:"pump"`
+type requestBody struct {
+	Par   string `json:"par"`
+	Pump  int    `json:"pump"`
+	Value bool   `json:"value"`
 }
 
 type response struct {
-	Success string `json:"success"`
+	Success int `json:"success"`
 }
 
-func (p *pump) updatePumpValues(updateEndpoint string, specificPumpID int) bool {
+/* Defining main pump functionality */
 
-	refresh := refreshRequestBody{"volume", specificPumpID}
-	payload := new(bytes.Buffer)
-	json.NewEncoder(payload).Encode(refresh)
-	req, _ := http.NewRequest("POST", updateEndpoint, payload)
-	req.Header.Add("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	check(err)
+func (p *pump) updatePumpValues(updateEndpoint string) bool {
+
+	updateRequestBodyPayload := requestBody{"volume", p.PumpID, false}
+	res := makeHTTPRequest(updateEndpoint, &updateRequestBodyPayload)
 	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		panic("POST failed")
-	}
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
 	var data dataPack
 	var pumpValues pumpNameAndValues
 	err = json.NewDecoder(strings.NewReader(string(body))).Decode(&data)
-	check(err)
+	if isError(err) {
+		return false
+	}
 	if data.Success != 1 {
 		return false
-		panic("Success value not 1")
 	}
-	fixed := strings.Replace(string(data.DataEscaped), "\\", "", -1)
-	err = json.NewDecoder(strings.NewReader(fixed)).Decode(&pumpValues)
+	fixedEscapeString := strings.Replace(string(data.DataEscaped), "\\", "", -1)
+	err = json.NewDecoder(strings.NewReader(fixedEscapeString)).Decode(&pumpValues)
+	if isError(err) {
+		return false
+	}
 
-	check(err)
+	p.VolumeTarget = pumpValues[strconv.Itoa(p.PumpID)].VolumeTarget
+	p.PurgeRate = pumpValues[strconv.Itoa(p.PumpID)].PurgeRate
+	p.PumpID = pumpValues[strconv.Itoa(p.PumpID)].PumpID
+	p.RateW = pumpValues[strconv.Itoa(p.PumpID)].RateW
+	p.Volume = pumpValues[strconv.Itoa(p.PumpID)].Volume
+	p.Status = pumpValues[strconv.Itoa(p.PumpID)].Status
+	p.Name = pumpValues[strconv.Itoa(p.PumpID)].Name
+	p.Direction = pumpValues[strconv.Itoa(p.PumpID)].Direction
+	p.Syringe = pumpValues[strconv.Itoa(p.PumpID)].Syringe
+	p.Used = pumpValues[strconv.Itoa(p.PumpID)].Used
+	p.VolumeTargetW = pumpValues[strconv.Itoa(p.PumpID)].VolumeTargetW
+	p.VolumeW = pumpValues[strconv.Itoa(p.PumpID)].VolumeW
+	p.Rate = pumpValues[strconv.Itoa(p.PumpID)].Rate
+	p.Stalled = pumpValues[strconv.Itoa(p.PumpID)].Stalled
+	p.Force = pumpValues[strconv.Itoa(p.PumpID)].Force
+	p.initialized = true
 	return true
 }
 
-func check(err error) {
-	if err != nil {
-		panic(err)
+func (p *pump) togglePump(startEndpoint string, start bool) bool {
+	startRequestPayload := requestBody{"status", p.PumpID, start}
+	res := makeHTTPRequest(startEndpoint, &startRequestPayload)
+
+	responseBody, _ := ioutil.ReadAll(res.Body)
+	if responseBody == nil {
+		return false
 	}
+	var responseStruct response
+	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
+	if isError(err) {
+		return false
+	}
+	if responseStruct.Success == 1 {
+		return true
+	}
+	return false
+}
+
+func (p *pump) purge(purgeEndpoint string) {
+	// TODO
+}
+
+// func (p *pump) setVolume(volumeEndpoint string, volume int) bool {
+// 	volumePayload := requestBody{"rate", p.PumpID, volume}
+// 	res := makeHTTPRequest(volumeEndpoint, &startRequestPayload)
+
+// 	responseBody, _ := ioutil.ReadAll(res.Body)
+// 	if responseBody == nil {
+// 		return false
+// 	}
+
+// 	var responseStruct response
+// 	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
+// 	if isError(err) {
+// 		return false
+// 	}
+// 	if responseStruct.Success == 1 {
+// 		return true
+// 	}
+// 	return false
+// }
+
+/* Helper functions */
+func makeHTTPRequest(endpointURL string, sendBody interface{}) *http.Response {
+	payload := new(bytes.Buffer)
+	json.NewEncoder(payload).Encode(&sendBody)
+	req, _ := http.NewRequest("POST", endpointURL, payload)
+	req.Header.Add("Content-Type", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	if isError(err) {
+		res = nil
+	}
+	if res.StatusCode != 200 {
+		res = nil
+	}
+	return res
+}
+
+func isError(err error) bool {
+	if err != nil {
+		return true
+	}
+	return false
 }
