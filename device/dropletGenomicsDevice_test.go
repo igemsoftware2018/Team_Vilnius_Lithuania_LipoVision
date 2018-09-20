@@ -1,25 +1,18 @@
 package device
 
-// func TestSetupDeviceURL(t *testing.T) {
-// 	var dummyDevice = DropletGenomicsDevice{"192.168.1.100", 8764}
-// 	correctAnswer := "http://192.168.1.100:8764"
+import (
+	"testing"
+)
 
-// 	generatedURL := setupDeviceURL(&dummyDevice)
-// 	if !strings.EqualFold(generatedURL, correctAnswer) {
-// 		t.Errorf("Setting url failed with URL: %s", generatedURL)
-// 	}
-// }
+func TestDevicePumpValues(t *testing.T) {
 
-// func TestAvailable(t *testing.T) {
-
-// 	var devices = []DropletGenomicsDevice{
-// 		DropletGenomicsDevice{"google.com", 80},
-// 		DropletGenomicsDevice{"jsonplaceholder.typicode.com", 80},
-// 	}
-
-// 	for _, device := range devices {
-// 		if !device.Available() {
-// 			t.Errorf("Error in Available function")
-// 		}
-// 	}
-// }
+	var device = DropletGenomicsDevice{"localhost", 5000, 5000, 5000, 0, nil}
+	device.PumpExperiment = 2
+	device.Pumps = make([]pump, device.PumpExperiment, device.PumpExperiment)
+	device.EstablishPumps()
+	if device.Update() {
+		// fmt.Print(device.GetPumpValues(true))
+	} else {
+		t.Errorf("%v", "Updating pumps failed")
+	}
+}

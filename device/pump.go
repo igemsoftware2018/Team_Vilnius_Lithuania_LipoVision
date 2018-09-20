@@ -3,9 +3,9 @@ package device
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -18,8 +18,8 @@ type pumpNameAndValues map[string]pump
 
 type pump struct {
 	VolumeTarget  float64 `json:"volumeTarget"`
-	PurgeRate     int     `json:"purge_rate"`
-	PumpID        int     `json:"pump_id"`
+	PurgeRate     float64 `json:"purge_rate"`
+	PumpID        float64 `json:"pump_id"`
 	RateW         float64 `json:"rateW"`
 	Volume        float64 `json:"volume"`
 	Status        bool    `json:"status"`
@@ -31,14 +31,14 @@ type pump struct {
 	VolumeW       float64 `json:"volumeW"`
 	Rate          float64 `json:"rate"`
 	Stalled       bool    `json:"stalled"`
-	Force         int     `json:"force"`
+	Force         float64 `json:"force"`
 	initialized   bool    `json:"-"`
 }
 
 type requestBody struct {
-	Par   string `json:"par"`
-	Pump  int    `json:"pump"`
-	Value bool   `json:"value"`
+	Par   string  `json:"par"`
+	Pump  float64 `json:"pump"`
+	Value bool    `json:"value"`
 }
 
 type response struct {
@@ -49,40 +49,39 @@ type response struct {
 
 func (p *pump) updatePumpValues(updateEndpoint string) bool {
 
-	updateRequestBodyPayload := requestBody{"volume", p.PumpID, false}
-	res := makeHTTPRequest(updateEndpoint, &updateRequestBodyPayload)
+	payload := requestBody{"volume", p.PumpID, true}
+	res := makeHTTPRequest(updateEndpoint, &payload)
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	var data dataPack
 	var pumpValues pumpNameAndValues
-	err = json.NewDecoder(strings.NewReader(string(body))).Decode(&data)
+	err = json.Unmarshal(body, &data)
 	if isError(err) {
 		return false
 	}
 	if data.Success != 1 {
 		return false
 	}
-	fixedEscapeString := strings.Replace(string(data.DataEscaped), "\\", "", -1)
-	err = json.NewDecoder(strings.NewReader(fixedEscapeString)).Decode(&pumpValues)
+	err = json.Unmarshal([]byte(data.DataEscaped), &pumpValues)
 	if isError(err) {
 		return false
 	}
 
-	p.VolumeTarget = pumpValues[strconv.Itoa(p.PumpID)].VolumeTarget
-	p.PurgeRate = pumpValues[strconv.Itoa(p.PumpID)].PurgeRate
-	p.PumpID = pumpValues[strconv.Itoa(p.PumpID)].PumpID
-	p.RateW = pumpValues[strconv.Itoa(p.PumpID)].RateW
-	p.Volume = pumpValues[strconv.Itoa(p.PumpID)].Volume
-	p.Status = pumpValues[strconv.Itoa(p.PumpID)].Status
-	p.Name = pumpValues[strconv.Itoa(p.PumpID)].Name
-	p.Direction = pumpValues[strconv.Itoa(p.PumpID)].Direction
-	p.Syringe = pumpValues[strconv.Itoa(p.PumpID)].Syringe
-	p.Used = pumpValues[strconv.Itoa(p.PumpID)].Used
-	p.VolumeTargetW = pumpValues[strconv.Itoa(p.PumpID)].VolumeTargetW
-	p.VolumeW = pumpValues[strconv.Itoa(p.PumpID)].VolumeW
-	p.Rate = pumpValues[strconv.Itoa(p.PumpID)].Rate
-	p.Stalled = pumpValues[strconv.Itoa(p.PumpID)].Stalled
-	p.Force = pumpValues[strconv.Itoa(p.PumpID)].Force
+	p.VolumeTarget = pumpValues[fmt.Sprint(p.PumpID)].VolumeTarget
+	p.PurgeRate = pumpValues[fmt.Sprint(p.PumpID)].PurgeRate
+	p.PumpID = pumpValues[fmt.Sprint(p.PumpID)].PumpID
+	p.RateW = pumpValues[fmt.Sprint(p.PumpID)].RateW
+	p.Volume = pumpValues[fmt.Sprint(p.PumpID)].Volume
+	p.Status = pumpValues[fmt.Sprint(p.PumpID)].Status
+	p.Name = pumpValues[fmt.Sprint(p.PumpID)].Name
+	p.Direction = pumpValues[fmt.Sprint(p.PumpID)].Direction
+	p.Syringe = pumpValues[fmt.Sprint(p.PumpID)].Syringe
+	p.Used = pumpValues[fmt.Sprint(p.PumpID)].Used
+	p.VolumeTargetW = pumpValues[fmt.Sprint(p.PumpID)].VolumeTargetW
+	p.VolumeW = pumpValues[fmt.Sprint(p.PumpID)].VolumeW
+	p.Rate = pumpValues[fmt.Sprint(p.PumpID)].Rate
+	p.Stalled = pumpValues[fmt.Sprint(p.PumpID)].Stalled
+	p.Force = pumpValues[fmt.Sprint(p.PumpID)].Force
 	p.initialized = true
 	return true
 }
