@@ -44,6 +44,8 @@ func main() {
 					getPumpValues(&deviceInstance)
 				case 2:
 					togglePump(&deviceInstance)
+				case 3:
+					setPumpValue(&deviceInstance)
 				case -1:
 					active = false
 				default:
@@ -95,6 +97,24 @@ func togglePump(device *device.DropletGenomicsDevice) {
 		}
 	}
 }
+func setPumpValue(device *device.DropletGenomicsDevice) {
+	if device.Available() {
+		var selectedPump int
+		var volume int
+		fmt.Println("\nSelect which pump to toggle (-1 for all)")
+		fmt.Scanf("%d\n", &selectedPump)
+		fmt.Println("\nSelect desired volume (ex. 90)")
+		fmt.Scanf("%d\n", &volume)
+		if device.SetPumpVolume(selectedPump, volume) {
+			fmt.Println("Volume set successfully")
+		} else {
+			fmt.Println("Volume set unsuccessfully")
+
+		}
+	} else {
+		fmt.Println("\nDevice is not available")
+	}
+}
 
 func getSelections() string {
 	return (`
@@ -103,6 +123,7 @@ Please enter one of the following:
 0 - check device status
 1 - get pump values
 2 - toggle pump
+3 - set pump value
 3 - purge
 -1 - exit program
 

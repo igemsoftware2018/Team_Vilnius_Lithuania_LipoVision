@@ -46,6 +46,9 @@ func (device *DropletGenomicsDevice) GetPumpValues(selectedPump int) (answer str
 		}
 		return
 	} else {
+		if !device.Pumps[selectedPump].updatePumpValues(device.setupGetValuesURL()) {
+			panic("ERROR")
+		}
 		answer += formatPumpValues(&device.Pumps[selectedPump])
 		return
 	}
@@ -66,6 +69,26 @@ func (device *DropletGenomicsDevice) TogglePump(selectedPump int, start bool) bo
 			} else {
 				return true
 			}
+		}
+	} else {
+		return false
+	}
+}
+
+func (device *DropletGenomicsDevice) SetPumpVolume(selectedPump int, volume int) bool {
+	if device.Available() {
+		if selectedPump == -1 {
+			for _, pump := range device.Pumps {
+				if !pump.setVolume(device.setupToggleURL(), volume) {
+					return false
+				}
+			}
+			return true
+		} else {
+			if !device.Pumps[selectedPump].setVolume(device.setupToggleURL(), volume) {
+				return false
+			}
+			return true
 		}
 	} else {
 		return false

@@ -41,6 +41,12 @@ type requestBody struct {
 	Value bool    `json:"value"`
 }
 
+type requestForVolumeBody struct {
+	Par   string  `json:"par"`
+	Pump  float64 `json:"pump"`
+	Value float64 `json:"value"`
+}
+
 type response struct {
 	Success int `json:"success"`
 }
@@ -62,7 +68,8 @@ func (p *pump) updatePumpValues(updateEndpoint string) bool {
 	if data.Success != 1 {
 		return false
 	}
-	err = json.Unmarshal([]byte(data.DataEscaped), &pumpValues)
+	fixedEscape := strings.Replace(data.DataEscaped, "\\", "", -1)
+	err = json.Unmarshal([]byte(fixedEscape), &pumpValues)
 	if isError(err) {
 		return false
 	}
@@ -105,29 +112,29 @@ func (p *pump) togglePump(startEndpoint string, start bool) bool {
 	return false
 }
 
-func (p *pump) purge(purgeEndpoint string) {
-	// TODO
+func (p *pump) setVolume(volumeEndpoint string, volume int) bool {
+	volumePayload := requestForVolumeBody{"rate", p.PumpID, float64(volume)}
+	res := makeHTTPRequest(volumeEndpoint, &volumePayload)
+
+	responseBody, _ := ioutil.ReadAll(res.Body)
+	if responseBody == nil {
+		return false
+	}
+
+	var responseStruct response
+	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
+	if isError(err) {
+		return false
+	}
+	if responseStruct.Success == 1 {
+		return true
+	}
+	return false
 }
 
-// func (p *pump) setVolume(volumeEndpoint string, volume int) bool {
-// 	volumePayload := requestBody{"rate", p.PumpID, volume}
-// 	res := makeHTTPRequest(volumeEndpoint, &startRequestPayload)
-
-// 	responseBody, _ := ioutil.ReadAll(res.Body)
-// 	if responseBody == nil {
-// 		return false
-// 	}
-
-// 	var responseStruct response
-// 	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-// 	if isError(err) {
-// 		return false
-// 	}
-// 	if responseStruct.Success == 1 {
-// 		return true
-// 	}
-// 	return false
-// }
+func (p *pump) purge(purgeEndpoint string) {
+	// TODO : collect data in GMC
+}
 
 /* Helper functions */
 func makeHTTPRequest(endpointURL string, sendBody interface{}) *http.Response {
