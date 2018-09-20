@@ -78,7 +78,21 @@ func checkDeviceStatus(device *device.DropletGenomicsDevice) {
 }
 func togglePump(device *device.DropletGenomicsDevice) {
 	if device.Available() {
-
+		var selectedPump int
+		var toggleValue bool
+		fmt.Println("\nSelect which pump to toggle (-1 for all)")
+		fmt.Scanf("%d\n", &selectedPump)
+		fmt.Println("\nStart or stop? (true,false)")
+		fmt.Scanf("%t\n", &toggleValue)
+		if device.TogglePump(selectedPump, toggleValue) {
+			if toggleValue {
+				fmt.Println("Successfully started...")
+			} else {
+				fmt.Println("Successfully stopped..")
+			}
+		} else {
+			fmt.Print("Toggle was unsuccessful")
+		}
 	}
 }
 
