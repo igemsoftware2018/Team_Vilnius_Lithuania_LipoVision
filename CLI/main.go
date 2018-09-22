@@ -65,9 +65,9 @@ func getPumpValues(device *device.DropletGenomicsDevice) {
 		fmt.Println("Select pump (-1 for all)")
 		fmt.Scanf("%d\n", &selectedPump)
 		if selectedPump == -1 {
-			fmt.Print(device.GetPumpValues(selectedPump))
+			fmt.Print(device.DisplayPumpValues(selectedPump))
 		} else {
-			fmt.Print(device.GetPumpValues(selectedPump))
+			fmt.Print(device.DisplayPumpValues(selectedPump))
 		}
 	}
 }

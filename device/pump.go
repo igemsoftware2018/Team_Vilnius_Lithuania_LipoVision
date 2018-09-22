@@ -1,11 +1,9 @@
 package device
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strings"
 )
 
@@ -32,13 +30,18 @@ type pump struct {
 	Rate          float64 `json:"rate"`
 	Stalled       bool    `json:"stalled"`
 	Force         float64 `json:"force"`
-	initialized   bool    `json:"-"`
+	initialized   bool
 }
 
 type requestBody struct {
 	Par   string  `json:"par"`
 	Pump  float64 `json:"pump"`
 	Value bool    `json:"value"`
+}
+
+type requestForResetBody struct {
+	Par  interface{} `json:"par"`
+	Pump float64     `json:"pump"`
 }
 
 type requestForVolumeBody struct {
@@ -51,7 +54,24 @@ type response struct {
 	Success int `json:"success"`
 }
 
+type responseReset struct {
+	Success int         `json:"success"`
+	Data    interface{} `json:"data"`
+}
+
 /* Defining main pump functionality */
+
+func NewPump(pumpID int) pump {
+	if pumpID > 0 && pumpID < 4 {
+		newPump := pump{}
+		newPump.PumpID = float64(pumpID)
+		return newPump
+	}
+	newPump := pump{}
+	newPump.PumpID = -1
+	return newPump
+
+}
 
 func (p *pump) updatePumpValues(updateEndpoint string) bool {
 
@@ -132,29 +152,66 @@ func (p *pump) setVolume(volumeEndpoint string, volume int) bool {
 	return false
 }
 
-func (p *pump) purge(purgeEndpoint string) {
-	// TODO : collect data in GMC
-}
+func (p *pump) toggleWithdrawInfuse(withdrawInfuse string, withdraw bool) bool {
+	payload := requestBody{"direction", p.PumpID, withdraw}
+	res := makeHTTPRequest(withdrawInfuse, &payload)
 
-/* Helper functions */
-func makeHTTPRequest(endpointURL string, sendBody interface{}) *http.Response {
-	payload := new(bytes.Buffer)
-	json.NewEncoder(payload).Encode(&sendBody)
-	req, _ := http.NewRequest("POST", endpointURL, payload)
-	req.Header.Add("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
+	responseBody, _ := ioutil.ReadAll(res.Body)
+	if responseBody == nil {
+		return false
+	}
+
+	var responseStruct response
+	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
 	if isError(err) {
-		res = nil
+		return false
 	}
-	if res.StatusCode != 200 {
-		res = nil
-	}
-	return res
-}
-
-func isError(err error) bool {
-	if err != nil {
+	if responseStruct.Success == 1 {
 		return true
 	}
 	return false
+}
+
+func (p *pump) resetPump(resetEndpoint string) bool {
+	payload := requestForResetBody{nil, p.PumpID}
+	res := makeHTTPRequest(resetEndpoint, &payload)
+
+	responseBody, _ := ioutil.ReadAll(res.Body)
+	if responseBody == nil {
+		return false
+	}
+
+	var responseStruct responseReset
+	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
+	if isError(err) {
+		return false
+	}
+	if responseStruct.Success == 1 {
+		return true
+	}
+	return false
+}
+
+func (p *pump) setTargetVolume(targetEndpoint string, volume int) bool {
+	targetVolumePayload := requestForVolumeBody{"volumeTargetW", p.PumpID, float64(volume)}
+	res := makeHTTPRequest(targetEndpoint, &targetVolumePayload)
+
+	responseBody, _ := ioutil.ReadAll(res.Body)
+	if responseBody == nil {
+		return false
+	}
+
+	var responseStruct response
+	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
+	if isError(err) {
+		return false
+	}
+	if responseStruct.Success == 1 {
+		return true
+	}
+	return false
+}
+
+func (p *pump) purge(purgeEndpoint string) {
+	// TODO : collect data in GMC
 }
