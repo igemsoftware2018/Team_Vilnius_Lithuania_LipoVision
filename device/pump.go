@@ -59,8 +59,6 @@ type responseReset struct {
 	Data    interface{} `json:"data"`
 }
 
-/* Defining main pump functionality */
-
 func NewPump(pumpID int) pump {
 	if pumpID > 0 && pumpID < 4 {
 		newPump := pump{}
@@ -77,7 +75,6 @@ func (p *pump) updatePumpValues(updateEndpoint string) bool {
 
 	payload := requestBody{"volume", p.PumpID, true}
 	res := makeHTTPRequest(updateEndpoint, &payload)
-	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	var data dataPack
 	var pumpValues pumpNameAndValues
@@ -85,6 +82,7 @@ func (p *pump) updatePumpValues(updateEndpoint string) bool {
 	if isError(err) {
 		return false
 	}
+	defer res.Body.Close()
 	if data.Success != 1 {
 		return false
 	}

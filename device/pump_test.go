@@ -1,20 +1,22 @@
 package device
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestUpdatePumpValues(t *testing.T) {
 
 	var dummyPump pump
-	dummyPump.updatePumpValues("http://localhost:5000/refresh")
-	fmt.Printf("Pump purge rate is: %v ", dummyPump.PurgeRate)
+	if !dummyPump.updatePumpValues("http://localhost:5000/refresh") {
+		t.Errorf("%v", "Updating Pump Values Failed")
+	}
 }
 
 func TestTogglePump(t *testing.T) {
+
 	var dummyPump pump
-	if !dummyPump.togglePump("http://localhost:5000/refresh", true) {
-		t.Errorf("%v", "Start not worked")
+	dummyPump.PumpID = 0
+	if !dummyPump.togglePump("http://localhost:5000/update", true) {
+		t.Errorf("%v", "Toggling not worked")
 	}
 }

@@ -17,9 +17,11 @@ func makeHTTPRequest(endpointURL string, sendBody interface{}) *http.Response {
 	res, err := http.DefaultClient.Do(req)
 	if isError(err) {
 		res = nil
+		return res
 	}
 	if res.StatusCode != 200 {
 		res = nil
+		return res
 	}
 	return res
 }
