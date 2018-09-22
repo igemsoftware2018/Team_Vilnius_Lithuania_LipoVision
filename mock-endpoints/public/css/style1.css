@@ -1,0 +1,220 @@
+/* GENERAL WEBSITE PARTS */
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  width:100vw;
+}
+body div.container {
+  box-shadow: 0px  0px 400px 180px white;
+  position: relative;
+  background-color:white;
+}
+.header-container {
+  display: flex;
+  justify-content: flex-end;
+  flex:1;
+  height: 50px;
+}
+.server-information {
+  display: flex;
+  justify-content: center;
+  flex: 3;
+  color: #ffffff;
+  font-size:0.7em;
+}
+.server-information > div {
+  padding: 0 10px;
+  border-bottom-left-radius:10px;
+  border-bottom-right-radius:10px;
+  background-color: rgba(0,0,0, 0.2);
+}
+.server-information > div div {
+  margin-bottom:5px;
+}
+.login-side-section {
+  margin-right:150px;
+}
+.login-side-section form {
+display: flex;
+justify-content: flex-end;
+}
+
+.login-side-section form .form-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.header-city-background{
+  position:absolute;
+  background: url("../img/devastated-city.jpg");
+  box-shadow: 0px -200px 250px 160px inset white;
+  background-size: contain;
+  background-repeat: no-repeat;
+  left: 0; 
+  right: 0; 
+  margin-left: auto; 
+  margin-right: auto; 
+  width:100vw;
+  max-width:1180px;
+  height:527px;
+}
+.soldiers-background{
+  position:absolute;
+  bottom:0;
+  background: url("../img/soldiers.jpg");
+  background-size:cover;
+  background-repeat: no-repeat;
+  box-shadow: 0px 170px 160px -9px inset white, 110px 0px 100px -50px inset white, -110px 0px 100px -50px inset white;
+  left: 0; 
+  right: 0;  
+  width:100vw;
+  max-width:1180px;
+  height:427px;
+}
+.central-container {
+  font-family: 'Special Elite', cursive;
+  position:absolute;
+  box-shadow: 230px 0px 110px -210px inset white;
+  top:20%;
+  width:inherit;
+  border:2px solid red;
+  height:500px;
+  z-index:999;
+}
+.old-book-container {
+  width:55%;
+  transform: rotate(-1deg);
+  position:relative;
+  height:100%;
+  background: url("../img/old_book.png");
+  background-size:contain;
+  background-repeat:no-repeat;
+}
+.old-book-container form {
+  width:50%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.old-book-container form .form-group {
+  transform:rotate(1deg);
+  display: flex;
+  justify-content: flex-end;
+  flex:1;
+}
+.old-book-wrapper form .form-group input, .old-book-wrapper form .form-group select {
+  flex:3;
+}
+.old-book-wrapper form .form-group label {
+  flex:1;
+}
+.old-book-container h2 {
+  margin:0 auto;
+  margin-top:30px;
+  width:60%;
+  text-align: center;
+  border:2px solid black;
+}
+.rankings-treasure-map {
+  position: relative;
+  background: url("../img/treasure-map.png");
+  background-size:contain;
+  background-repeat:no-repeat;
+  width: 35%;
+  height:100%;
+}
+/* ELEMENTS */
+.forgot-password {
+  color:#ffffff;
+}
+.login-form input.login-input {
+  font-size:0.6em;
+  color:white;
+  background:rgba(0,0,0, 0.1);
+  width:95%;
+  height: 30%;
+}
+.line-break {
+  width:100%;
+}
+.myButton {
+	-moz-box-shadow: 0px -1px 0px 0px #ffffff;
+	-webkit-box-shadow: 0px -1px 0px 0px #ffffff;
+	box-shadow: 0px -1px 0px 0px #ffffff;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #fffbed), color-stop(1, #eae0c2));
+	background:-moz-linear-gradient(top, #fffbed 5%, #eae0c2 100%);
+	background:-webkit-linear-gradient(top, #fffbed 5%, #eae0c2 100%);
+	background:-o-linear-gradient(top, #fffbed 5%, #eae0c2 100%);
+	background:-ms-linear-gradient(top, #fffbed 5%, #eae0c2 100%);
+	background:linear-gradient(to bottom, #fffbed 5%, #eae0c2 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffbed', endColorstr='#eae0c2',GradientType=0);
+	background-color:#fffbed;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+	display:inline-block;
+	cursor:pointer;
+	color:#333333;
+	font-family:Arial;
+	font-size:10px;
+	padding:5px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+.myButton:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #eae0c2), color-stop(1, #fffbed));
+	background:-moz-linear-gradient(top, #eae0c2 5%, #fffbed 100%);
+	background:-webkit-linear-gradient(top, #eae0c2 5%, #fffbed 100%);
+	background:-o-linear-gradient(top, #eae0c2 5%, #fffbed 100%);
+	background:-ms-linear-gradient(top, #eae0c2 5%, #fffbed 100%);
+	background:linear-gradient(to bottom, #eae0c2 5%, #fffbed 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#eae0c2', endColorstr='#fffbed',GradientType=0);
+	background-color:#eae0c2;
+}
+.myButton:active {
+	position:relative;
+	top:1px;
+}
+.signupButton {
+	-moz-box-shadow:inset 0px 1px 45px 7px #a6827e;
+	-webkit-box-shadow:inset 0px 1px 45px 7px #a6827e;
+	box-shadow:inset 0px 1px 45px 7px #a6827e;
+	background-color:#7d5d3b;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+	border:1px solid #54381e;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Courier New;
+	font-size:1em;
+  font-weight:bold;
+  padding: 1em 3em;
+  margin: 0 auto;
+	text-decoration:none;
+  text-shadow:0px 1px 0px #4d3534;
+  transform:rotate(1deg);
+}
+.signupButton:hover {
+	background-color:#634b30;
+}
+.signupButton:active {
+	position:relative;
+	top:1px;
+}
+
+        
+form div.remember-wrapper {
+  font-size:0.7em;
+  padding-top:4px;
+  padding-left:2px;
+}
+
+        
+
+        
+        
