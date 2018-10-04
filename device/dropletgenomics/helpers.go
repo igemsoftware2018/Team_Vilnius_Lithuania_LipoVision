@@ -1,4 +1,4 @@
-package device
+package dropletgenomics
 
 import (
 	"bytes"
@@ -33,13 +33,13 @@ func isError(err error) bool {
 	return false
 }
 
-func setupDeviceURL(device *DropletGenomicsDevice) string {
+func setupDeviceURL(device *Device) string {
 	return fmt.Sprintf("http://%v:%v", device.IPAddress, strconv.Itoa(device.HTTPPort))
 }
-func (device *DropletGenomicsDevice) setupGetValuesURL() string {
+func (device *Device) setupGetValuesURL() string {
 	return fmt.Sprintf("http://%v:%v/refresh", device.IPAddress, strconv.Itoa(device.PumpDataPort))
 }
-func (device *DropletGenomicsDevice) setupToggleURL() string {
+func (device *Device) setupToggleURL() string {
 	return fmt.Sprintf("http://%v:%v/update", device.IPAddress, strconv.Itoa(device.PumpDataPort))
 }
 func formatPumpValues(p *pump) string {

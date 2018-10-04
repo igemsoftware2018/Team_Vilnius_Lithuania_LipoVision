@@ -1,4 +1,4 @@
-package device
+package dropletgenomics
 
 import (
 	"encoding/json"
