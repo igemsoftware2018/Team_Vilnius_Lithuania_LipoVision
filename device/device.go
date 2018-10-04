@@ -2,23 +2,18 @@ package device
 
 import (
 	"context"
+	"image"
 )
 
 //Frame Defines a frame structure that is a part of the stream
-type Frame struct {
-	frame interface{}
-	ctx   context.Context
-}
+type Frame interface {
 
-// GetFrame gets underlying Frame
-func (f Frame) GetFrame() interface{} {
-	return f.frame
-}
+	//Frame Gets the underlying frame
+	Frame() image.Image
 
-//Skip Exposes innner context Done()
-//Which basically means that the frame should be skipped
-func (f Frame) Skip() <-chan struct{} {
-	return f.ctx.Done()
+	//SkippedFrame provides context.Done() like method of
+	//communicating that a frame should be skipped
+	Skip() <-chan struct{}
 }
 
 //Device Is a physical device that program is connecting to
