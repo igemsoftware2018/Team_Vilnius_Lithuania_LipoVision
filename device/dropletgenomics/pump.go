@@ -21,9 +21,7 @@ type dataPack struct {
 	Success     int    `json:"success"`
 }
 
-type pumpNameAndValues map[string]pump
-
-type pump struct {
+type Pump struct {
 	VolumeTarget  float64 `json:"volumeTarget"`
 	PurgeRate     float64 `json:"purge_rate"`
 	PumpID        float64 `json:"pump_id"`
@@ -53,9 +51,8 @@ type response struct {
 	Data    interface{} `json:"data"`
 }
 
-func (p pump) Invoke(invoke clientInvocation, data interface{}) error {
+func (p Pump) Invoke(invoke clientInvocation, data interface{}) error {
 	const pumpBaseAddr = "http://192.168.1.100:8764"
-
 	var (
 		endpoint    string
 		payloadData interface{}
@@ -92,7 +89,6 @@ func (p pump) Invoke(invoke clientInvocation, data interface{}) error {
 	}
 
 	var responseData response
-
 	switch invoke {
 	case PumpRefresh:
 		var doubleJson dataPack
@@ -106,7 +102,6 @@ func (p pump) Invoke(invoke clientInvocation, data interface{}) error {
 		if err := json.NewDecoder(httpResponse.Body).Decode(&responseData); err != nil {
 			return err
 		}
-
 		if responseData.Success == 1 {
 			return errors.New("camera device failed to process the request")
 		}
@@ -114,13 +109,13 @@ func (p pump) Invoke(invoke clientInvocation, data interface{}) error {
 	return nil
 }
 
-func NewPump(pumpID int) pump {
+func NewPump(pumpID int) Pump {
 	if pumpID > 0 && pumpID < 4 {
-		newPump := pump{}
+		newPump := Pump{}
 		newPump.PumpID = float64(pumpID)
 		return newPump
 	}
-	newPump := pump{}
+	newPump := Pump{}
 	newPump.PumpID = -1
 	return newPump
 

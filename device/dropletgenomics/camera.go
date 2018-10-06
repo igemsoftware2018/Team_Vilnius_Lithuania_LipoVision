@@ -14,7 +14,7 @@ const (
 	CameraAutoAdjust
 )
 
-type camera struct {
+type Camera struct {
 	FrameRate    float64 `json:"volumeTarget"`
 	Exposure     float64 `json:"purge_rate"`
 	Illumination float64 `json:"pump_id"`
@@ -29,7 +29,7 @@ type responseBool struct {
 	Success bool `json:"success"`
 }
 
-func (c camera) Invoke(invoke clientInvocation, data interface{}) error {
+func (c Camera) Invoke(invoke clientInvocation, data interface{}) error {
 	const cameraBaseAddr string = "http://192.168.1.100:8765"
 
 	var (

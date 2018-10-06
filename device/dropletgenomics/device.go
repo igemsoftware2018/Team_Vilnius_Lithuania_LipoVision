@@ -1,3 +1,4 @@
+//dropletgenomics package defines the DropletGenomics company's microfluidincs device
 package dropletgenomics
 
 import (
@@ -9,21 +10,24 @@ import (
 	"time"
 )
 
+//CreateDropletGenomicsDevice returns a device configured with given configuration
 func CreateDropletGenomicsDevice() Device {
 	return Device{}
 }
 
+//Device is DropletGenomics' rendition of microfluidics devices
 type Device struct {
 	IPAddress         string
 	HTTPPort          int
 	PumpDataPort      int
 	RecordingDataPort int
 	PumpExperiment    int
-	pumps             []pump
-	camera            camera
+	pumps             []Pump
+	camera            Camera
 }
 
-func (d Device) Stream(ctx context.Context) <-chan Frame {
+//Stream launches async stream decoding of ctx lifetime
+func (device Device) Stream(ctx context.Context) <-chan Frame {
 	const (
 		streamEndpoint string = "http://192.168.1.100:8765/video_feed"
 		frameRate      int64  = 30
@@ -43,7 +47,7 @@ func (d Device) Stream(ctx context.Context) <-chan Frame {
 				}
 				byteStream := response.Body
 
-				var decodeError error = nil
+				var decodeError error
 				for decodeError == nil {
 					var img image.Image
 
@@ -77,27 +81,25 @@ func (device *Device) Available() bool {
 }
 
 //Camera returns the device's camera data
-func (device Device) Camera() camera {
-	return device.camera
+func (device Device) Camera() *Camera {
+	return &device.camera
 }
 
 //Pump returns device's pump by it's id
-func (device Device) Pump(index int) pump {
-	return device.pumps[index]
+func (device Device) Pump(index int) *Pump {
+	return &device.pumps[index]
 }
 
+//RefreshAll launches refresh on all pumps
 func (device Device) RefreshAll() {
 	for _, pump := range device.pumps {
 		pump.Invoke(PumpRefresh, nil)
 	}
 }
 
-func (device *Device) DefinePumpExperiment(numberOfPumps int) {
-	//TODO : get endpoints from device in GMC
-}
-
-func (device *Device) EstablishPumpsWithID() {
-	device.pumps = make([]pump, device.PumpExperiment, device.PumpExperiment)
+//EstablishPumpsWithID creates a pump with ID
+func (device Device) EstablishPumpsWithID() {
+	device.pumps = make([]Pump, device.PumpExperiment, device.PumpExperiment)
 	for i := 0; i < device.PumpExperiment; i++ {
 		device.pumps[i] = NewPump(i)
 	}
