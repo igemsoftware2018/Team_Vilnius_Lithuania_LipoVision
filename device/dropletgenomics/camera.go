@@ -1,8 +1,10 @@
 package dropletgenomics
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"net/http"
 )
 
 // Comms operations for the camera
@@ -32,6 +34,17 @@ func makePayload(setting string, data interface{}) payload {
 	return payload{Par: setting, Value: data.(float64)}
 }
 
+func makePost(url string, contentType string, data interface{}, response *http.Response) error {
+	reqBody := new(bytes.Buffer)
+	err := json.NewEncoder(reqBody).Encode(&data)
+	postResp, err := http.Post(url, contentType, reqBody)
+	if err != nil {
+		return err
+	}
+	response = postResp
+	return nil
+}
+
 func (c camera) Invoke(invoke clientInvocation, data interface{}) error {
 	const cameraBaseAddr string = "http://192.168.1.100:8765"
 
@@ -52,14 +65,13 @@ func (c camera) Invoke(invoke clientInvocation, data interface{}) error {
 		panic("incorrect invoke operation of camera client")
 	}
 
-	response := makeHTTPRequest(endpoint, payloadData)
-	if response != nil {
-		return errors.New("failed to communicate with camera")
+	var response *http.Response
+	if err := makePost(endpoint, "application/json", payloadData, response); err != nil {
+		return err
 	}
 
 	var responseData responseBool
-	err := json.NewDecoder(response.Body).Decode(&responseData)
-	if err != nil {
+	if err := json.NewDecoder(response.Body).Decode(&responseData); err != nil {
 		return err
 	}
 
