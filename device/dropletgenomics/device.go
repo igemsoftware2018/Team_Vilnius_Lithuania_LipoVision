@@ -19,7 +19,7 @@ type Device struct {
 	PumpDataPort      int
 	RecordingDataPort int
 	PumpExperiment    int
-	Pumps             []pump
+	pumps             []pump
 	camera            camera
 }
 
@@ -65,50 +65,14 @@ func (device *Device) Available() bool {
 	return true
 }
 
-func (device *Device) GetVolumeTarget(pump int) float64 {
-	return device.Pumps[pump].VolumeTarget
+//Camera returns the device's camera data
+func (device Device) Camera() camera {
+	return device.camera
 }
-func (device *Device) GetPurgeRate(pump int) float64 {
-	return device.Pumps[pump].PurgeRate
-}
-func (device *Device) GetPumpID(pump int) float64 {
-	return device.Pumps[pump].PumpID
-}
-func (device *Device) GetRateW(pump int) float64 {
-	return device.Pumps[pump].PumpID
-}
-func (device *Device) GetVolume(pump int) float64 {
-	return device.Pumps[pump].Volume
-}
-func (device *Device) GetStatus(pump int) bool {
-	return device.Pumps[pump].Status
-}
-func (device *Device) GetName(pump int) string {
-	return device.Pumps[pump].Name
-}
-func (device *Device) GetDirection(pump int) bool {
-	return device.Pumps[pump].Direction
-}
-func (device *Device) GetSyringe(pump int) float64 {
-	return device.Pumps[pump].Syringe
-}
-func (device *Device) GetUsed(pump int) bool {
-	return device.Pumps[pump].Used
-}
-func (device *Device) GetVolumeTargetW(pump int) float64 {
-	return device.Pumps[pump].VolumeTargetW
-}
-func (device *Device) GetVolumeW(pump int) float64 {
-	return device.Pumps[pump].VolumeW
-}
-func (device *Device) GetRate(pump int) float64 {
-	return device.Pumps[pump].Rate
-}
-func (device *Device) GetStalled(pump int) bool {
-	return device.Pumps[pump].Stalled
-}
-func (device *Device) GetForce(pump int) float64 {
-	return device.Pumps[pump].Force
+
+//Pump returns device's pump by it's id
+func (device Device) Pump(index int) pump {
+	return device.pumps[index]
 }
 
 func (device *Device) DefinePumpExperiment(numberOfPumps int) {
@@ -116,15 +80,15 @@ func (device *Device) DefinePumpExperiment(numberOfPumps int) {
 }
 
 func (device *Device) EstablishPumpsWithID() {
-	device.Pumps = make([]pump, device.PumpExperiment, device.PumpExperiment)
+	device.pumps = make([]pump, device.PumpExperiment, device.PumpExperiment)
 	for i := 0; i < device.PumpExperiment; i++ {
-		device.Pumps[i] = NewPump(i)
+		device.pumps[i] = NewPump(i)
 	}
 }
 
 func (device *Device) Update() bool {
-	for i := 0; i < len(device.Pumps); i++ {
-		if !device.Pumps[i].updatePumpValues("http://" + device.IPAddress + ":" + strconv.Itoa(device.PumpDataPort) + "/refresh") {
+	for i := 0; i < len(device.pumps); i++ {
+		if !device.pumps[i].updatePumpValues("http://" + device.IPAddress + ":" + strconv.Itoa(device.PumpDataPort) + "/refresh") {
 			return false
 		}
 	}
@@ -132,7 +96,7 @@ func (device *Device) Update() bool {
 }
 
 func (device *Device) Reset(pump int) bool {
-	if !device.Pumps[pump].resetPump("http://" + device.IPAddress + ":" + strconv.Itoa(device.PumpDataPort) + "/update_pars") {
+	if !device.pumps[pump].resetPump("http://" + device.IPAddress + ":" + strconv.Itoa(device.PumpDataPort) + "/update_pars") {
 		return false
 	}
 	return true
@@ -140,14 +104,14 @@ func (device *Device) Reset(pump int) bool {
 
 func (device *Device) ToggleWithdrawInfuse(pump int, widthdraw bool) bool {
 	if pump == -1 {
-		for i := 0; i < len(device.Pumps); i++ {
-			if !device.Pumps[i].toggleWithdrawInfuse(device.setupToggleURL(), widthdraw) {
+		for i := 0; i < len(device.pumps); i++ {
+			if !device.pumps[i].toggleWithdrawInfuse(device.setupToggleURL(), widthdraw) {
 				return false
 			}
 		}
 		return true
 	}
-	if !device.Pumps[pump].toggleWithdrawInfuse(device.setupToggleURL(), widthdraw) {
+	if !device.pumps[pump].toggleWithdrawInfuse(device.setupToggleURL(), widthdraw) {
 		return false
 	}
 	return true
@@ -155,7 +119,7 @@ func (device *Device) ToggleWithdrawInfuse(pump int, widthdraw bool) bool {
 
 func (device *Device) DisplayPumpValues(selectedPump int) (answer string) {
 	if selectedPump == -1 {
-		for _, pump := range device.Pumps {
+		for _, pump := range device.pumps {
 			if !pump.updatePumpValues(device.setupGetValuesURL()) {
 				panic("ERROR")
 			}
@@ -163,10 +127,10 @@ func (device *Device) DisplayPumpValues(selectedPump int) (answer string) {
 		}
 		return
 	}
-	if !device.Pumps[selectedPump].updatePumpValues(device.setupGetValuesURL()) {
+	if !device.pumps[selectedPump].updatePumpValues(device.setupGetValuesURL()) {
 		panic("ERROR")
 	}
-	answer += formatPumpValues(&device.Pumps[selectedPump])
+	answer += formatPumpValues(&device.pumps[selectedPump])
 	return
 
 }
@@ -174,14 +138,14 @@ func (device *Device) DisplayPumpValues(selectedPump int) (answer string) {
 func (device *Device) TogglePump(selectedPump int, start bool) bool {
 	if device.Available() {
 		if selectedPump == -1 {
-			for _, pump := range device.Pumps {
+			for _, pump := range device.pumps {
 				if !pump.togglePump(device.setupToggleURL(), start) {
 					return false
 				}
 			}
 			return true
 		}
-		if !device.Pumps[selectedPump].togglePump(device.setupToggleURL(), start) {
+		if !device.pumps[selectedPump].togglePump(device.setupToggleURL(), start) {
 			return false
 		}
 		return true
@@ -193,14 +157,14 @@ func (device *Device) TogglePump(selectedPump int, start bool) bool {
 func (device *Device) SetPumpVolume(selectedPump int, volume int) bool {
 	if device.Available() {
 		if selectedPump == -1 {
-			for _, pump := range device.Pumps {
+			for _, pump := range device.pumps {
 				if !pump.setVolume(device.setupToggleURL(), volume) {
 					return false
 				}
 			}
 			return true
 		}
-		if !device.Pumps[selectedPump].setVolume(device.setupToggleURL(), volume) {
+		if !device.pumps[selectedPump].setVolume(device.setupToggleURL(), volume) {
 			return false
 		}
 		return true
@@ -213,14 +177,14 @@ func (device *Device) SetPumpVolume(selectedPump int, volume int) bool {
 func (device *Device) SetPumpTargetVolume(selectedPump int, volume int) bool {
 	if device.Available() {
 		if selectedPump == -1 {
-			for _, pump := range device.Pumps {
+			for _, pump := range device.pumps {
 				if !pump.setTargetVolume(device.setupToggleURL(), volume) {
 					return false
 				}
 			}
 			return true
 		}
-		if !device.Pumps[selectedPump].setTargetVolume(device.setupToggleURL(), volume) {
+		if !device.pumps[selectedPump].setTargetVolume(device.setupToggleURL(), volume) {
 			return false
 		}
 		return true
