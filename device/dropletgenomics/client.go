@@ -8,6 +8,13 @@ import (
 	"strconv"
 )
 
+type clientInvocation int
+
+//client is the interface that is inherited by all device's pats or modules, whose data is received non-locally
+type client interface {
+	Invoke(clientInvocation, interface{})
+}
+
 /* Helper functions */
 func makeHTTPRequest(endpointURL string, sendBody interface{}) *http.Response {
 	payload := new(bytes.Buffer)

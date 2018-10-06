@@ -193,31 +193,3 @@ func (device *Device) SetPumpTargetVolume(selectedPump int, volume int) bool {
 	return false
 
 }
-
-func (device *Device) SetCameraIllumination(ill float64) bool {
-	if !device.camera.setIllumination("http://"+device.IPAddress+":"+strconv.Itoa(device.RecordingDataPort)+"/update", ill) {
-		return false
-	}
-	return true
-}
-
-func (device *Device) SetCameraExposure(ex float64) bool {
-	if !device.camera.setExposure("http://"+device.IPAddress+":"+strconv.Itoa(device.RecordingDataPort)+"/update", ex) {
-		return false
-	}
-	return true
-}
-
-func (device *Device) SetCameraFrameRate(fr float64) bool {
-	if !device.camera.setFrameRate("http://"+device.IPAddress+":"+strconv.Itoa(device.RecordingDataPort)+"/update", fr) {
-		return false
-	}
-	return true
-}
-
-func (device *Device) AutoAdjustCamera() bool {
-	if !device.camera.autoAdjust("http://" + device.IPAddress + ":" + strconv.Itoa(device.RecordingDataPort) + "/auto_adjust") {
-		return false
-	}
-	return true
-}

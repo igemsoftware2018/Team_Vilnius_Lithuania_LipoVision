@@ -2,8 +2,15 @@ package dropletgenomics
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"strings"
+	"errors"
+)
+
+// Comms operations for the camera
+const (
+	CameraSetIllumination clientInvocation = iota
+	CameraSetExposure
+	CameraSetFrameRate
+	CameraAutoAdjust
 )
 
 type camera struct {
@@ -21,83 +28,44 @@ type responseBool struct {
 	Success bool `json:"success"`
 }
 
-func (c *camera) setIllumination(endpoint string, illumination float64) bool {
-	c.Illumination = illumination
-
-	ilPayload := payload{"illumination", illumination}
-	res := makeHTTPRequest(endpoint, &ilPayload)
-
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
-	}
-	var responseStruct responseBool
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success {
-		return true
-	}
-	return false
+func makePayload(setting string, data interface{}) payload {
+	return payload{Par: setting, Value: data.(float64)}
 }
 
-func (c *camera) setExposure(endpoint string, exposure float64) bool {
-	c.Exposure = exposure
+func (c camera) Invoke(invoke clientInvocation, data interface{}) error {
+	const cameraBaseAddr string = "http://192.168.1.100:8765"
 
-	exPayload := payload{"exposure", exposure}
-	res := makeHTTPRequest(endpoint, &exPayload)
+	var endpoint string
+	var payloadData payload
 
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
+	switch invoke {
+	case CameraSetExposure:
+		endpoint = cameraBaseAddr + "/update"
+	case CameraSetFrameRate:
+		endpoint = cameraBaseAddr + "/update"
+	case CameraSetIllumination:
+		endpoint = cameraBaseAddr + "/update"
+		payloadData = makePayload("illumination", data)
+	case CameraAutoAdjust:
+		endpoint = cameraBaseAddr + "/auto_adjust"
+	default:
+		panic("incorrect invoke operation of camera client")
 	}
-	var responseStruct responseBool
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success {
-		return true
-	}
-	return false
-}
 
-func (c *camera) setFrameRate(endpoint string, frameRate float64) bool {
-	c.FrameRate = frameRate
+	response := makeHTTPRequest(endpoint, payloadData)
+	if response != nil {
+		return errors.New("failed to communicate with camera")
+	}
 
-	frPayload := payload{"live_rate", frameRate}
-	res := makeHTTPRequest(endpoint, &frPayload)
+	var responseData responseBool
+	err := json.NewDecoder(response.Body).Decode(&responseData)
+	if err != nil {
+		return err
+	}
 
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
+	if !responseData.Success {
+		return errors.New("camera device failed to process the request")
 	}
-	var responseStruct responseBool
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success {
-		return true
-	}
-	return false
-}
 
-func (c *camera) autoAdjust(endpoint string) bool {
-	res := makeHTTPRequest(endpoint, nil)
-
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
-	}
-	var responseStruct responseBool
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success {
-		return true
-	}
-	return false
+	return nil
 }
