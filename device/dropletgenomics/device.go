@@ -6,12 +6,12 @@ import (
 	"image"
 	"image/png"
 	"net/http"
-	"strconv"
 	"time"
 )
 
-const streamEndpoint string = "http://example.com/"
-const frameRate int64 = 30
+func CreateDropletGenomicsDevice() Device {
+	return Device{}
+}
 
 type Device struct {
 	IPAddress         string
@@ -24,6 +24,11 @@ type Device struct {
 }
 
 func (d Device) Stream(ctx context.Context) <-chan Frame {
+	const (
+		streamEndpoint string = "http://192.168.1.100:8765/video_feed"
+		frameRate      int64  = 30
+	)
+
 	stream := make(chan Frame, 10)
 	go func() {
 		for {
@@ -37,13 +42,19 @@ func (d Device) Stream(ctx context.Context) <-chan Frame {
 					continue
 				}
 				byteStream := response.Body
+
 				var decodeError error = nil
 				for decodeError == nil {
 					var img image.Image
+
+					buffer := make([]byte, 36, 36)
+					byteStream.Read(buffer)
+
 					img, decodeError = png.Decode(byteStream)
 					frameLifetime, cancel := context.WithTimeout(ctx, time.Second/(time.Duration)(frameRate))
 					stream <- Frame{frame: img, ctx: frameLifetime, cancel: cancel}
 				}
+				byteStream.Close()
 			}
 		}
 	}()
@@ -73,6 +84,12 @@ func (device Device) Camera() camera {
 //Pump returns device's pump by it's id
 func (device Device) Pump(index int) pump {
 	return device.pumps[index]
+}
+
+func (device Device) RefreshAll() {
+	for _, pump := range device.pumps {
+		pump.Invoke(PumpRefresh, nil)
+	}
 }
 
 func (device *Device) DefinePumpExperiment(numberOfPumps int) {
