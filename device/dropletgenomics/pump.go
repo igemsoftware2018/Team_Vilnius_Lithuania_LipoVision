@@ -2,9 +2,18 @@ package dropletgenomics
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"strings"
+	"errors"
+	"net/http"
+)
+
+const (
+	PumpSetTargetVolume clientInvocation = iota
+	PumpReset
+	PumpToggleWithdrawInfuse
+	PumpSetVolume
+	PumpToggle
+	PumpRefresh
+	PumpPurge
 )
 
 type dataPack struct {
@@ -34,29 +43,75 @@ type pump struct {
 }
 
 type requestBody struct {
-	Par   string  `json:"par"`
-	Pump  float64 `json:"pump"`
-	Value bool    `json:"value"`
-}
-
-type requestForResetBody struct {
-	Par  interface{} `json:"par"`
-	Pump float64     `json:"pump"`
-}
-
-type requestForVolumeBody struct {
-	Par   string  `json:"par"`
-	Pump  float64 `json:"pump"`
-	Value float64 `json:"value"`
+	Par   interface{} `json:"par"`
+	Pump  interface{} `json:"pump"`
+	Value interface{} `json:"value"`
 }
 
 type response struct {
-	Success int `json:"success"`
-}
-
-type responseReset struct {
 	Success int         `json:"success"`
 	Data    interface{} `json:"data"`
+}
+
+func (p pump) Invoke(invoke clientInvocation, data interface{}) error {
+	const pumpBaseAddr = "http://192.168.1.100:8764"
+
+	var (
+		endpoint    string
+		payloadData interface{}
+	)
+
+	switch invoke {
+	case PumpSetTargetVolume:
+		payloadData = requestBody{Par: "volumeTargetW", Pump: p.PumpID, Value: data}
+		endpoint = pumpBaseAddr + "/update"
+	case PumpReset:
+		payloadData = requestBody{Pump: p.PumpID}
+		endpoint = pumpBaseAddr + "/update"
+	case PumpToggleWithdrawInfuse:
+		payloadData = requestBody{Par: "direction", Pump: p.PumpID, Value: data}
+		endpoint = pumpBaseAddr + "/update"
+	case PumpSetVolume:
+		payloadData = requestBody{Par: "rate", Pump: p.PumpID, Value: data}
+		endpoint = pumpBaseAddr + "/update"
+	case PumpToggle:
+		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
+		endpoint = pumpBaseAddr + "/update"
+	case PumpRefresh:
+		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
+		endpoint = pumpBaseAddr + "/refresh"
+	case PumpPurge:
+		// TODO : collect data in GMC
+	default:
+		panic("incorrect invoke operation of pump client")
+	}
+
+	var httpResponse *http.Response
+	if err := makePost(endpoint, "application/json", payloadData, httpResponse); err != nil {
+		return err
+	}
+
+	var responseData response
+
+	switch invoke {
+	case PumpRefresh:
+		var doubleJson dataPack
+		if err := json.NewDecoder(httpResponse.Body).Decode(&doubleJson); err != nil {
+			return err
+		}
+		if err := json.Unmarshal([]byte(doubleJson.DataEscaped), &p); err != nil {
+			return err
+		}
+	default:
+		if err := json.NewDecoder(httpResponse.Body).Decode(&responseData); err != nil {
+			return err
+		}
+
+		if responseData.Success == 1 {
+			return errors.New("camera device failed to process the request")
+		}
+	}
+	return nil
 }
 
 func NewPump(pumpID int) pump {
@@ -69,147 +124,4 @@ func NewPump(pumpID int) pump {
 	newPump.PumpID = -1
 	return newPump
 
-}
-
-func (p *pump) updatePumpValues(updateEndpoint string) bool {
-
-	payload := requestBody{"volume", p.PumpID, true}
-	res := makeHTTPRequest(updateEndpoint, &payload)
-	body, err := ioutil.ReadAll(res.Body)
-	var data dataPack
-	var pumpValues pumpNameAndValues
-	err = json.Unmarshal(body, &data)
-	if isError(err) {
-		return false
-	}
-	defer res.Body.Close()
-	if data.Success != 1 {
-		return false
-	}
-	fixedEscape := strings.Replace(data.DataEscaped, "\\", "", -1)
-	err = json.Unmarshal([]byte(fixedEscape), &pumpValues)
-	if isError(err) {
-		return false
-	}
-
-	p.VolumeTarget = pumpValues[fmt.Sprint(p.PumpID)].VolumeTarget
-	p.PurgeRate = pumpValues[fmt.Sprint(p.PumpID)].PurgeRate
-	p.PumpID = pumpValues[fmt.Sprint(p.PumpID)].PumpID
-	p.RateW = pumpValues[fmt.Sprint(p.PumpID)].RateW
-	p.Volume = pumpValues[fmt.Sprint(p.PumpID)].Volume
-	p.Status = pumpValues[fmt.Sprint(p.PumpID)].Status
-	p.Name = pumpValues[fmt.Sprint(p.PumpID)].Name
-	p.Direction = pumpValues[fmt.Sprint(p.PumpID)].Direction
-	p.Syringe = pumpValues[fmt.Sprint(p.PumpID)].Syringe
-	p.Used = pumpValues[fmt.Sprint(p.PumpID)].Used
-	p.VolumeTargetW = pumpValues[fmt.Sprint(p.PumpID)].VolumeTargetW
-	p.VolumeW = pumpValues[fmt.Sprint(p.PumpID)].VolumeW
-	p.Rate = pumpValues[fmt.Sprint(p.PumpID)].Rate
-	p.Stalled = pumpValues[fmt.Sprint(p.PumpID)].Stalled
-	p.Force = pumpValues[fmt.Sprint(p.PumpID)].Force
-	p.initialized = true
-	return true
-}
-
-func (p *pump) togglePump(startEndpoint string, start bool) bool {
-	startRequestPayload := requestBody{"status", p.PumpID, start}
-	res := makeHTTPRequest(startEndpoint, &startRequestPayload)
-
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
-	}
-	var responseStruct response
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success == 1 {
-		return true
-	}
-	return false
-}
-
-func (p *pump) setVolume(volumeEndpoint string, volume int) bool {
-	volumePayload := requestForVolumeBody{"rate", p.PumpID, float64(volume)}
-	res := makeHTTPRequest(volumeEndpoint, &volumePayload)
-
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
-	}
-
-	var responseStruct response
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success == 1 {
-		return true
-	}
-	return false
-}
-
-func (p *pump) toggleWithdrawInfuse(withdrawInfuse string, withdraw bool) bool {
-	payload := requestBody{"direction", p.PumpID, withdraw}
-	res := makeHTTPRequest(withdrawInfuse, &payload)
-
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
-	}
-
-	var responseStruct response
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success == 1 {
-		return true
-	}
-	return false
-}
-
-func (p *pump) resetPump(resetEndpoint string) bool {
-	payload := requestForResetBody{nil, p.PumpID}
-	res := makeHTTPRequest(resetEndpoint, &payload)
-
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
-	}
-
-	var responseStruct responseReset
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success == 1 {
-		return true
-	}
-	return false
-}
-
-func (p *pump) setTargetVolume(targetEndpoint string, volume int) bool {
-	targetVolumePayload := requestForVolumeBody{"volumeTargetW", p.PumpID, float64(volume)}
-	res := makeHTTPRequest(targetEndpoint, &targetVolumePayload)
-
-	responseBody, _ := ioutil.ReadAll(res.Body)
-	if responseBody == nil {
-		return false
-	}
-
-	var responseStruct response
-	err := json.NewDecoder(strings.NewReader(string(responseBody))).Decode(&responseStruct)
-	if isError(err) {
-		return false
-	}
-	if responseStruct.Success == 1 {
-		return true
-	}
-	return false
-}
-
-func (p *pump) purge(purgeEndpoint string) {
-	// TODO : collect data in GMC
 }

@@ -1,7 +1,6 @@
 package dropletgenomics
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -30,37 +29,27 @@ type responseBool struct {
 	Success bool `json:"success"`
 }
 
-func makePayload(setting string, data interface{}) payload {
-	return payload{Par: setting, Value: data.(float64)}
-}
-
-func makePost(url string, contentType string, data interface{}, response *http.Response) error {
-	reqBody := new(bytes.Buffer)
-	err := json.NewEncoder(reqBody).Encode(&data)
-	postResp, err := http.Post(url, contentType, reqBody)
-	if err != nil {
-		return err
-	}
-	response = postResp
-	return nil
-}
-
 func (c camera) Invoke(invoke clientInvocation, data interface{}) error {
 	const cameraBaseAddr string = "http://192.168.1.100:8765"
 
-	var endpoint string
-	var payloadData payload
+	var (
+		endpoint    string
+		payloadData interface{}
+	)
 
 	switch invoke {
 	case CameraSetExposure:
 		endpoint = cameraBaseAddr + "/update"
+		payloadData = makePayload("exposure", data)
 	case CameraSetFrameRate:
 		endpoint = cameraBaseAddr + "/update"
+		payloadData = makePayload("live_rate", data)
 	case CameraSetIllumination:
 		endpoint = cameraBaseAddr + "/update"
 		payloadData = makePayload("illumination", data)
 	case CameraAutoAdjust:
 		endpoint = cameraBaseAddr + "/auto_adjust"
+		payloadData = nil
 	default:
 		panic("incorrect invoke operation of camera client")
 	}

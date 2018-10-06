@@ -15,6 +15,21 @@ type client interface {
 	Invoke(clientInvocation, interface{})
 }
 
+func makePayload(setting string, data interface{}) payload {
+	return payload{Par: setting, Value: data.(float64)}
+}
+
+func makePost(url string, contentType string, data interface{}, response *http.Response) error {
+	reqBody := new(bytes.Buffer)
+	err := json.NewEncoder(reqBody).Encode(&data)
+	postResp, err := http.Post(url, contentType, reqBody)
+	if err != nil {
+		return err
+	}
+	response = postResp
+	return nil
+}
+
 /* Helper functions */
 func makeHTTPRequest(endpointURL string, sendBody interface{}) *http.Response {
 	payload := new(bytes.Buffer)
