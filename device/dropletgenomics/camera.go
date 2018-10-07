@@ -3,7 +3,6 @@ package dropletgenomics
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 )
 
 // Comms operations for the camera
@@ -54,9 +53,9 @@ func (c Camera) Invoke(invoke clientInvocation, data interface{}) error {
 		panic("incorrect invoke operation of camera client")
 	}
 
-	var response *http.Response
-	if err := makePost(endpoint, "application/json", payloadData, response); err != nil {
-		return err
+	response, postErr := makePost(endpoint, "application/json", payloadData)
+	if postErr != nil {
+		return postErr
 	}
 
 	var responseData responseBool

@@ -3,7 +3,7 @@ package dropletgenomics
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
+	"fmt"
 )
 
 const (
@@ -83,9 +83,10 @@ func (p Pump) Invoke(invoke clientInvocation, data interface{}) error {
 		panic("incorrect invoke operation of pump client")
 	}
 
-	var httpResponse *http.Response
-	if err := makePost(endpoint, "application/json", payloadData, httpResponse); err != nil {
-		return err
+	fmt.Printf("%f\n", p.PumpID)
+	httpResponse, postErr := makePost(endpoint, "application/json", payloadData)
+	if postErr != nil {
+		return postErr
 	}
 
 	var responseData response
@@ -107,16 +108,4 @@ func (p Pump) Invoke(invoke clientInvocation, data interface{}) error {
 		}
 	}
 	return nil
-}
-
-func NewPump(pumpID int) Pump {
-	if pumpID > 0 && pumpID < 4 {
-		newPump := Pump{}
-		newPump.PumpID = float64(pumpID)
-		return newPump
-	}
-	newPump := Pump{}
-	newPump.PumpID = -1
-	return newPump
-
 }

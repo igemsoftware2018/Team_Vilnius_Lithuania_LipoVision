@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	dropletDevice := dropletgenomics.CreateDropletGenomicsDevice()
+	dropletDevice := dropletgenomics.Create()
 	originalWindow := gocv.NewWindow("Stream")
 	ctx, cancel := context.WithCancel(context.Background())
 	stream := dropletDevice.Stream(ctx)
@@ -22,11 +22,11 @@ func main() {
 				fmt.Println(err)
 			}
 			originalWindow.IMShow(mat)
-			if originalWindow.WaitKey(10)&0xFF == 'c' {
+		default:
+			if originalWindow.WaitKey(1)&0xFF == 'c' {
 				cancel()
 				break
 			}
-			fmt.Printf("frame done\n")
 		}
 	}
 }
