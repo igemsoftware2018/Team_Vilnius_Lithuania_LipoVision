@@ -20,3 +20,6 @@ lipovision
 
 # Ignore vscode (for now)
 .vscode
+
+# Ignore generated mock files
+**/mock_*

@@ -19,3 +19,15 @@ Monitor and optimise your liposome microfluidics devices. Vilnius-Lithuania iGEM
 - Set up Go (https://golang.org)
 - Set up gocv (https://gocv.io)
 - Optional: Set up VS Code and Go plugin (https://code.visualstudio.com)
+
+# Contributing/Developing
+
+- Set up mocking tools as described [here](https://github.com/golang/mock)
+- Before running tests you need to run `go generate ./...` (do not push generated code - this is not a library)
+- Scientific devices can be rather custom and scarce. Meaning, there might be only one person in the world that can maintain parts of it's code 
+  (the one that has access to the device)! If it will never see any serial production, it might not be a good idea to add it here! 
+  Although, integration with standard tools are always welcome. Let's keep this tidy!
+- Someone who's reading your device PR probably can't test it, mock it as much as possible! 
+- Avoid any big dependencies (OpenCV is already a big one, and is already annoying to distribute). Best Go dependencies are written in pure Go!
+- If you just have to have some cgo dependency, try to have it statically linked!
+- Be a good Gopher: Be tidy! Write tests! Use interfaces! Mock interfaces!
