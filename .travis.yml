@@ -15,6 +15,7 @@ cache:
   directories:
     - $HOME/usr
     - $HOME/testdata
+    - /usr/local/Cellar
 
 env:
   global:
