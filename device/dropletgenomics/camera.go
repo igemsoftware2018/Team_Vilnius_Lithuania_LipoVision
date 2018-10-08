@@ -3,59 +3,55 @@ package dropletgenomics
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 )
 
-// Comms operations for the camera
-const (
-	CameraSetIllumination clientInvocation = iota
-	CameraSetExposure
-	CameraSetFrameRate
-	CameraAutoAdjust
-)
-
-//Camera has the camera dataset and controlls comms
+// Camera has the camera dataset and controlls comms
 type Camera struct {
-	FrameRate    float64 `json:"volumeTarget"`
-	Exposure     float64 `json:"purge_rate"`
-	Illumination float64 `json:"pump_id"`
+	BaseAddr     string `json:"-"`
+	FrameRate    int    `json:"volumeTarget"`
+	Exposure     int    `json:"purge_rate"`
+	Illumination int    `json:"pump_id"`
 }
 
 type payload struct {
-	Par   string  `json:"par"`
-	Value float64 `json:"value"`
+	Par   string      `json:"par"`
+	Value interface{} `json:"value"`
 }
 
 type responseBool struct {
 	Success bool `json:"success"`
 }
 
-//Invoke performs communications with the device by specific commands
-func (c Camera) Invoke(invoke clientInvocation, data interface{}) error {
-	const cameraBaseAddr string = "http://192.168.1.100:8765"
-
+// Invoke performs communications with the device by specific commands
+func (c *Camera) Invoke(invoke device.ClientInvocation, data interface{}) error {
 	var (
 		endpoint    string
 		payloadData interface{}
 	)
 
 	switch invoke {
-	case CameraSetExposure:
-		endpoint = cameraBaseAddr + "/update"
-		payloadData = makePayload("exposure", data)
-	case CameraSetFrameRate:
-		endpoint = cameraBaseAddr + "/update"
-		payloadData = makePayload("live_rate", data)
-	case CameraSetIllumination:
-		endpoint = cameraBaseAddr + "/update"
-		payloadData = makePayload("illumination", data)
-	case CameraAutoAdjust:
-		endpoint = cameraBaseAddr + "/auto_adjust"
+	case device.CameraSetExposure:
+		endpoint = c.BaseAddr + "/update"
+		payloadData = MakePayload("exposure", data)
+		c.Exposure = data.(int)
+	case device.CameraSetFrameRate:
+		endpoint = c.BaseAddr + "/update"
+		payloadData = MakePayload("live_rate", data)
+		c.FrameRate = data.(int)
+	case device.CameraSetIllumination:
+		endpoint = c.BaseAddr + "/update"
+		payloadData = MakePayload("illumination", data)
+		c.Illumination = data.(int)
+	case device.CameraAutoAdjust:
+		endpoint = c.BaseAddr + "/auto_adjust"
 		payloadData = nil
 	default:
 		panic("incorrect invoke operation of camera client")
 	}
 
-	response, postErr := makePost(endpoint, "application/json", payloadData)
+	response, postErr := MakePost(endpoint, "application/json", payloadData)
 	if postErr != nil {
 		return postErr
 	}

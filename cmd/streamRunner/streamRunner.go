@@ -44,4 +44,6 @@ Processing:
 			}
 		}
 	}
+
+	originalWindow.Close()
 }

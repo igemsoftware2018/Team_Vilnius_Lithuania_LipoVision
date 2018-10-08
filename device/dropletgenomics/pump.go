@@ -3,29 +3,21 @@ package dropletgenomics
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-)
 
-const (
-	PumpSetTargetVolume clientInvocation = iota
-	PumpReset
-	PumpToggleWithdrawInfuse
-	PumpSetVolume
-	PumpToggle
-	PumpRefresh
-	PumpPurge
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 )
 
 type dataPack struct {
 	DataEscaped string `json:"data_pack"`
-	Success     int    `json:"success"`
+	Success     bool   `json:"success"`
 }
 
-//Pump owns data of a pump and performs comms with device
+// Pump owns data of a pump and performs comms with device
 type Pump struct {
+	BaseAddr      string  `json:"-"`
 	VolumeTarget  float64 `json:"volumeTarget"`
 	PurgeRate     float64 `json:"purge_rate"`
-	PumpID        float64 `json:"pump_id"`
+	PumpID        int     `json:"pump_id"`
 	RateW         float64 `json:"rateW"`
 	Volume        float64 `json:"volume"`
 	Status        bool    `json:"status"`
@@ -48,62 +40,59 @@ type requestBody struct {
 }
 
 type response struct {
-	Success int         `json:"success"`
+	Success bool        `json:"success"`
 	Data    interface{} `json:"data"`
 }
 
-//Invoke performs communications with the device by specific commands
-func (p Pump) Invoke(invoke clientInvocation, data interface{}) error {
-	const pumpBaseAddr = "http://192.168.1.100:8764"
+// Invoke performs communications with the device by specific commands
+func (p *Pump) Invoke(invoke device.ClientInvocation, data interface{}) error {
 	var (
 		endpoint    string
 		payloadData interface{}
 	)
 
-	endpoint = pumpBaseAddr + "/update"
+	endpoint = p.BaseAddr + "/update"
 	switch invoke {
-	case PumpSetTargetVolume:
+	case device.PumpSetTargetVolume:
 		payloadData = requestBody{Par: "volumeTargetW", Pump: p.PumpID, Value: data}
-	case PumpReset:
+	case device.PumpReset:
 		payloadData = requestBody{Pump: p.PumpID}
-	case PumpToggleWithdrawInfuse:
+	case device.PumpToggleWithdrawInfuse:
 		payloadData = requestBody{Par: "direction", Pump: p.PumpID, Value: data}
-	case PumpSetVolume:
+	case device.PumpSetVolume:
 		payloadData = requestBody{Par: "rate", Pump: p.PumpID, Value: data}
-	case PumpToggle:
+	case device.PumpToggle:
 		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
-	case PumpRefresh:
+	case device.PumpRefresh:
 		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
-		endpoint = pumpBaseAddr + "/refresh"
-	case PumpPurge:
+		endpoint = p.BaseAddr + "/refresh"
+	case device.PumpPurge:
 		// TODO : collect data in GMC
 	default:
 		panic("incorrect invoke operation of pump client")
 	}
 
-	fmt.Printf("%f\n", p.PumpID)
-	httpResponse, postErr := makePost(endpoint, "application/json", payloadData)
+	httpResponse, postErr := MakePost(endpoint, "application/json", payloadData)
 	if postErr != nil {
 		return postErr
 	}
 
-	var responseData response
+	var decodeError error
 	switch invoke {
-	case PumpRefresh:
+	case device.PumpRefresh:
 		var doubleJSON dataPack
-		if err := json.NewDecoder(httpResponse.Body).Decode(&doubleJSON); err != nil {
-			return err
-		}
-		if err := json.Unmarshal([]byte(doubleJSON.DataEscaped), &p); err != nil {
-			return err
+		if decodeError = json.NewDecoder(httpResponse.Body).Decode(&doubleJSON); decodeError == nil {
+			if decodeError := json.Unmarshal([]byte(doubleJSON.DataEscaped), &p); decodeError == nil {
+				return nil
+			}
 		}
 	default:
-		if err := json.NewDecoder(httpResponse.Body).Decode(&responseData); err != nil {
-			return err
-		}
-		if responseData.Success == 1 {
-			return errors.New("camera device failed to process the request")
+		var responseData response
+		if decodeError = json.NewDecoder(httpResponse.Body).Decode(&responseData); decodeError == nil {
+			if !responseData.Success {
+				decodeError = errors.New("camera device failed to process the request")
+			}
 		}
 	}
-	return nil
+	return decodeError
 }
