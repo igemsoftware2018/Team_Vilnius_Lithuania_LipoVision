@@ -38,10 +38,10 @@ type Device struct {
 func (device Device) Stream(ctx context.Context) <-chan Frame {
 	const (
 		streamEndpoint string = "http://192.168.1.100:8765/video_feed"
-		frameRate      int    = 15
+		frameRate      int    = 20
 	)
 
-	stream := make(chan Frame, 10)
+	stream := make(chan Frame, 20)
 	go func() {
 		for {
 			select {
