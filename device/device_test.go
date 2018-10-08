@@ -2,21 +2,58 @@ package device
 
 import (
 	"context"
+	"image"
+	"image/color"
 	"testing"
 	"time"
 )
+
+type testImage struct {
+	underlying int
+}
+
+func (t testImage) Get() int {
+	return t.underlying
+}
+
+func (t testImage) ColorModel() color.Model {
+	return nil
+}
+
+func (t testImage) At(x, y int) color.Color {
+	return nil
+}
+
+func (t testImage) Bounds() image.Rectangle {
+	return image.Rectangle{}
+}
+
+type testFrame struct {
+	frame  testImage
+	ctx    context.Context
+	cancel context.CancelFunc
+}
+
+func (f testFrame) Skip() <-chan struct{} {
+	return f.ctx.Done()
+}
+
+func (f testFrame) Frame() testImage {
+	defer f.cancel()
+	return f.frame
+}
 
 type intProducingDevice struct {
 	itemSleepTime time.Duration
 }
 
-func (ipd intProducingDevice) Stream(ctx context.Context) <-chan Frame {
-	stream := make(chan Frame, 5)
+func (ipd intProducingDevice) Stream(ctx context.Context) <-chan testFrame {
+	stream := make(chan testFrame, 5)
 	go func() {
 		for i := 0; i < 20; i++ {
 			// Old frame must be cancelled just before the new frame is dispatched
 			frameCtx, cancel := context.WithCancel(ctx)
-			stream <- Frame{frame: i + 1, ctx: frameCtx}
+			stream <- testFrame{frame: testImage{underlying: i + 1}, ctx: frameCtx, cancel: cancel}
 			time.Sleep(ipd.itemSleepTime)
 			cancel()
 		}
@@ -46,7 +83,7 @@ func TestGettingFrames(t *testing.T) {
 			default:
 			}
 
-			if item.GetFrame().(int) != streamIndex+1 {
+			if item.Frame().Get() != streamIndex+1 {
 				t.Errorf("Process failed manipulation with: %d", streamIndex+1)
 			}
 			streamIndex = streamIndex + 1
