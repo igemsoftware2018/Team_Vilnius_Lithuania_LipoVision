@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	dropletDevice := dropletgenomics.Create()
+	dropletDevice := dropletgenomics.Create(4)
 	originalWindow := gocv.NewWindow("Stream")
 	ctx, cancel := context.WithCancel(context.Background())
 	stream := dropletDevice.Stream(ctx)

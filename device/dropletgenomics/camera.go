@@ -13,6 +13,7 @@ const (
 	CameraAutoAdjust
 )
 
+//Camera has the camera dataset and controlls comms
 type Camera struct {
 	FrameRate    float64 `json:"volumeTarget"`
 	Exposure     float64 `json:"purge_rate"`
@@ -28,6 +29,7 @@ type responseBool struct {
 	Success bool `json:"success"`
 }
 
+//Invoke performs communications with the device by specific commands
 func (c Camera) Invoke(invoke clientInvocation, data interface{}) error {
 	const cameraBaseAddr string = "http://192.168.1.100:8765"
 

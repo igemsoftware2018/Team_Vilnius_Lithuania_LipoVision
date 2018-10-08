@@ -12,7 +12,7 @@ import (
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	device := dropletgenomics.Create()
+	device := dropletgenomics.Create(4)
 
 	signalBuffer := make(chan os.Signal, 1)
 	signal.Notify(signalBuffer, os.Interrupt)
