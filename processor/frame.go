@@ -7,16 +7,16 @@ import (
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 )
 
-func CreateFrameProcessor() FrameProcessor {
-	return FrameProcessor{context: context.Background()} // Default context must be Background(), WithContext() sets an optional context
+func CreateFrameProcessor(ctx context.Context) FrameProcessor {
+	return FrameProcessor{context: ctx} // Default context must be Background(), WithContext() sets an optional context
 }
 
-//FrameProcessor Defines a processor for incoming frames of the stream
+// FrameProcessor Defines a processor for incoming frames of the stream
 type FrameProcessor struct {
 	context context.Context
 }
 
-//Process Processes a stream of frames coming from a device
+// Process Processes a stream of frames coming from a device
 func (fp FrameProcessor) Process(frames <-chan device.Frame) {
 	for frame := range frames {
 		select {
@@ -33,10 +33,4 @@ func (fp FrameProcessor) Process(frames <-chan device.Frame) {
 		// Do Frame processing here (move to unexported function preferably)
 		// Needed initialization to be done in CreateFrameProcessor, held in struct itself
 	}
-}
-
-//WithContext Allows to set a Context for the Processsor
-func (fp FrameProcessor) WithContext(context context.Context) FrameProcessor {
-	fp.context = context
-	return fp
 }
