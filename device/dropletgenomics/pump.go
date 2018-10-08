@@ -21,6 +21,7 @@ type dataPack struct {
 	Success     int    `json:"success"`
 }
 
+//Pump owns data of a pump and performs comms with device
 type Pump struct {
 	VolumeTarget  float64 `json:"volumeTarget"`
 	PurgeRate     float64 `json:"purge_rate"`
@@ -51,6 +52,7 @@ type response struct {
 	Data    interface{} `json:"data"`
 }
 
+//Invoke performs communications with the device by specific commands
 func (p Pump) Invoke(invoke clientInvocation, data interface{}) error {
 	const pumpBaseAddr = "http://192.168.1.100:8764"
 	var (
@@ -58,22 +60,18 @@ func (p Pump) Invoke(invoke clientInvocation, data interface{}) error {
 		payloadData interface{}
 	)
 
+	endpoint = pumpBaseAddr + "/update"
 	switch invoke {
 	case PumpSetTargetVolume:
 		payloadData = requestBody{Par: "volumeTargetW", Pump: p.PumpID, Value: data}
-		endpoint = pumpBaseAddr + "/update"
 	case PumpReset:
 		payloadData = requestBody{Pump: p.PumpID}
-		endpoint = pumpBaseAddr + "/update"
 	case PumpToggleWithdrawInfuse:
 		payloadData = requestBody{Par: "direction", Pump: p.PumpID, Value: data}
-		endpoint = pumpBaseAddr + "/update"
 	case PumpSetVolume:
 		payloadData = requestBody{Par: "rate", Pump: p.PumpID, Value: data}
-		endpoint = pumpBaseAddr + "/update"
 	case PumpToggle:
 		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
-		endpoint = pumpBaseAddr + "/update"
 	case PumpRefresh:
 		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
 		endpoint = pumpBaseAddr + "/refresh"
@@ -92,11 +90,11 @@ func (p Pump) Invoke(invoke clientInvocation, data interface{}) error {
 	var responseData response
 	switch invoke {
 	case PumpRefresh:
-		var doubleJson dataPack
-		if err := json.NewDecoder(httpResponse.Body).Decode(&doubleJson); err != nil {
+		var doubleJSON dataPack
+		if err := json.NewDecoder(httpResponse.Body).Decode(&doubleJSON); err != nil {
 			return err
 		}
-		if err := json.Unmarshal([]byte(doubleJson.DataEscaped), &p); err != nil {
+		if err := json.Unmarshal([]byte(doubleJSON.DataEscaped), &p); err != nil {
 			return err
 		}
 	default:

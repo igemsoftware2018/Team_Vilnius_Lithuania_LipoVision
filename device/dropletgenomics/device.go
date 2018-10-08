@@ -1,4 +1,4 @@
-//dropletgenomics package defines the DropletGenomics company's microfluidincs device
+//Package dropletgenomics defines the DropletGenomics company's microfluidincs device
 package dropletgenomics
 
 import (
@@ -20,9 +20,9 @@ func init() {
 	transport.DisableKeepAlives = true
 }
 
-//CreateDropletGenomicsDevice returns a device configured with given configuration
-func Create() *Device {
-	device := Device{pumpExperiment: 4}
+//Create returns a device configured with given configuration
+func Create(usedPumps int) *Device {
+	device := Device{pumpExperiment: usedPumps}
 	device.establishPumpsWithID()
 	return &device
 }
@@ -43,11 +43,12 @@ func (device Device) Stream(ctx context.Context) <-chan Frame {
 
 	stream := make(chan Frame, 20)
 	go func() {
-		for {
+		complete := false
+		for !complete {
 			select {
 			case <-ctx.Done():
 				fmt.Printf("%s\n", "Stream closed")
-				break
+				complete = true
 			default:
 				response, err := client.Get(streamEndpoint)
 				if err != nil {

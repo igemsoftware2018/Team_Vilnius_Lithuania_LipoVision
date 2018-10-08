@@ -8,7 +8,7 @@ import (
 
 type clientInvocation int
 
-//client is the interface that is inherited by all device's pats or modules, whose data is received non-locally
+//Client is the interface that is inherited by all device's pats or modules, it's functions perform comms with the device
 type Client interface {
 	Invoke(clientInvocation, interface{})
 }
