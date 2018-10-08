@@ -5,8 +5,14 @@ import (
 	"image"
 )
 
-// Frame defines how dropletgenomics frame looks like.
-// It's a struct to be passed as message.
+// CreateFrame creates a frame with given frame and context
+func CreateFrame(ctx context.Context, frame image.Image) Frame {
+	fCtx, cancel := context.WithCancel(ctx)
+	return Frame{ctx: fCtx, cancel: cancel, frame: frame}
+}
+
+// Frame defines how dropletgenomics frame looks like. It's a struct to be passed as message.
+// Getting the internal frame ends this struct's lifetime.
 type Frame struct {
 
 	// frame is an underlying frame
