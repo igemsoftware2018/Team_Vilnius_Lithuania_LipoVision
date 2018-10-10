@@ -16,10 +16,16 @@ func MakePayload(setting string, data interface{}) payload {
 // TODO: eliminate use
 func MakePost(url string, contentType string, data interface{}) (*http.Response, error) {
 	reqBody := new(bytes.Buffer)
+
 	err := json.NewEncoder(reqBody).Encode(data)
+	if err != nil {
+		return nil, err
+	}
+
 	postResp, err := http.Post(url, contentType, reqBody)
 	if err != nil {
 		return nil, err
 	}
+
 	return postResp, nil
 }
