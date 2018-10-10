@@ -51,7 +51,7 @@ Processing:
 				time.Sleep(time.Second)
 			}
 			for i := 0; i < device.NumPumps(); i++ {
-				fmt.Printf("Pump %d values: %f\n", i, device.Pump(i).Rate)
+				fmt.Printf("Pump %d values: %f\n", i, device.Pump(i))
 			}
 		}
 	}
