@@ -134,7 +134,7 @@ func (d *Device) Available() bool {
 }
 
 // Camera returns the device's camera data
-func (d Device) Camera() *Camera {
+func (d Device) Camera() device.Client {
 	return &d.camera
 }
 
@@ -144,7 +144,7 @@ func (d Device) NumPumps() int {
 }
 
 // Pump returns device's pump by it's id
-func (d Device) Pump(index int) *Pump {
+func (d Device) Pump(index int) device.Client {
 	return &d.pumps[index]
 }
 

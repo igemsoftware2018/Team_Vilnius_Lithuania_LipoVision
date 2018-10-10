@@ -44,7 +44,7 @@ build_script:
   - mkdir build
   - mkdir pkg
   - go build -o build/lipovision.exe
-  - robocopy C:/opencv/build/install/x64/mingw/lib/ build/ ^ 3
+  - robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/ ^ 3
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
   - PowerShell -Command "& Get-FileHash pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip -Algorithm MD5 > pkg/lipovision-%APPVEYOR_BUILD_VERSION%.md5"
 

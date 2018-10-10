@@ -2,35 +2,36 @@ package processor
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
+	log "github.com/sirupsen/logrus"
 )
 
-func CreateFrameProcessor(ctx context.Context) FrameProcessor {
-	return FrameProcessor{context: ctx} // Default context must be Background(), WithContext() sets an optional context
+// CreateFrameProcessor Creates a frame processor with given settings
+func CreateFrameProcessor() FrameProcessor {
+	log.Info("FrameProcessor created")
+	return FrameProcessor{}
 }
 
 // FrameProcessor Defines a processor for incoming frames of the stream
 type FrameProcessor struct {
-	context context.Context
 }
 
 // Process Processes a stream of frames coming from a device
-func (fp FrameProcessor) Process(frames <-chan device.Frame) {
-	for frame := range frames {
-		select {
-		// If Process is cancelled, exit with error
-		case <-fp.context.Done():
-			return
+func (fp *FrameProcessor) Process(ctx context.Context, frames <-chan device.Frame) {
+	go func() {
+		for frame := range frames {
+			select {
+			case <-ctx.Done():
+				log.Info("Processor stopped")
+				return
+			case <-frame.Skip():
+				log.Info("Frame skip")
+				continue
+			default:
+			}
 
-		// If Frame is cancelled, log and skip
-		case <-frame.Skip():
-			fmt.Printf("%s", "Skipped frame")
-			continue
+			frame.Frame()
 		}
-
-		// Do Frame processing here (move to unexported function preferably)
-		// Needed initialization to be done in CreateFrameProcessor, held in struct itself
-	}
+	}()
 }

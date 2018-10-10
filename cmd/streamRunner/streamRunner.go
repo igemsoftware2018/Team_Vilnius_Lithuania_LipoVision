@@ -7,8 +7,15 @@ import (
 	"os/signal"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device/dropletgenomics"
+	log "github.com/sirupsen/logrus"
 	"gocv.io/x/gocv"
 )
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{}
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.WarnLevel)
+}
 
 func main() {
 	dropletDevice := dropletgenomics.Create(4)
