@@ -32,6 +32,25 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:aaf5bc1f3acae6506eeba7763db83ca43443eac79f8a5efd19e2bd67218910d1"
+  name = "github.com/lxn/walk"
+  packages = [
+    ".",
+    "declarative",
+  ]
+  pruneopts = "UT"
+  revision = "2ee9388367e00f3be6aa99780aff3954b04971a1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:04c7a467efd86783c42907225abf9a6e1d9a8cfbc6c9626693b0c89762bfd1e6"
+  name = "github.com/lxn/win"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d19d56ae2f2d8e0b8e8e1d66a86a4d3e522524f7"
+
+[[projects]]
   digest = "1:dc2d85c13ac22c22a1f3170a41a8e1b897fa05134aaf533f16df44f66a25b4a1"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -74,12 +93,22 @@
   pruneopts = "UT"
   revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
 
+[[projects]]
+  digest = "1:5d3e23515e7916c152cc665eda0f7eaf6fdf8fdfe7c3dbac97049bcbd649b33f"
+  name = "gopkg.in/Knetic/govaluate.v3"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d216395917cc49052c7c7094cf57f09657ca08a8"
+  version = "v3.0.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/golang/mock/gomock",
     "github.com/gotk3/gotk3/gtk",
+    "github.com/lxn/walk",
+    "github.com/lxn/walk/declarative",
     "github.com/sirupsen/logrus",
     "gocv.io/x/gocv",
   ]
