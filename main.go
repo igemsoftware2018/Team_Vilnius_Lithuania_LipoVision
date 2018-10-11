@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"strings"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/window"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -14,12 +15,14 @@ func main() {
 		  > video`)
 	flag.Parse()
 
+	if strings.Compare("", *deviceRequested) != 0 {
+		log.Info("selected device: ", *deviceRequested)
+	}
+
 	mainWindow, err := window.NewMain()
 	if err != nil {
 		panic(err)
 	}
 	mainWindow.Run()
 
-	//processor := processor.CreateFrameProcessor()
-	fmt.Printf(*deviceRequested)
 }

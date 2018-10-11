@@ -3,7 +3,14 @@
 package window
 
 import (
+	"bytes"
+	"context"
+	"image/png"
+
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device/video"
+	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
+	log "github.com/sirupsen/logrus"
 )
 
 // init gtk
@@ -24,16 +31,17 @@ func NewMain() (*Main, error) {
 		gtk.MainQuit()
 	})
 
-	l, err := gtk.LabelNew("Hello, gotk3!")
-	if err != nil {
-		return nil, err
+	gtkImage, gtkErr := gtk.ImageNew()
+	if gtkErr != nil {
+		panic(gtkErr)
 	}
-	win.Add(l)
+
+	win.Add(gtkImage)
 
 	return &Main{
 		window: win,
-		label:  l,
-		events: make(map[string]Event),
+		image:  gtkImage,
+		events: make(map[string]chan Event),
 	}, nil
 }
 
@@ -43,12 +51,45 @@ type Main struct {
 
 	events map[string]chan Event
 	window *gtk.Window
-	label  *gtk.Label
+	image  *gtk.Image
 }
 
 // Run starts main loop, blocks
-func (w Main) Run() {
+func (w *Main) Run() {
 	w.window.ShowAll()
+	videoDev := video.Create("video_1527101251.mp4", 20)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	stream := videoDev.Stream(ctx)
+
+	go func() {
+	Process:
+		for {
+			select {
+			case <-ctx.Done():
+				break Process
+			case frame := <-stream:
+				frameImg := frame.Frame()
+
+				writer := new(bytes.Buffer)
+				png.Encode(writer, frameImg)
+
+				loader, loaderErr := gdk.PixbufLoaderNew()
+				if loaderErr != nil {
+					panic(loaderErr)
+				}
+				pixbuf, pixErr := loader.WriteAndReturnPixbuf(writer.Bytes())
+				if pixErr != nil {
+					log.Warn("failed to get pixbuf")
+					continue
+				}
+
+				w.image.SetFromPixbuf(pixbuf)
+			}
+		}
+	}()
+
 	gtk.Main()
 }
 
