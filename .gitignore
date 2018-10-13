@@ -23,3 +23,8 @@ opencv/
 
 # Ignore generated mock files
 **/mock_*
+
+assets/lipovision.iconset/
+assets/*.syso
+
+LipoVision.app

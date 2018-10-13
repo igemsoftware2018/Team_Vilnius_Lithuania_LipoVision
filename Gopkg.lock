@@ -3,9 +3,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fca75464ffc131da4a1c76e80dddf3186ec16223963cdc0cfe05538349b24a94"
+  digest = "1:72938f5cbc0208313aebf204dce11bc3ef2fad9453d89818656406e15fd38035"
   name = "github.com/andlabs/ui"
-  packages = ["."]
+  packages = [
+    ".",
+    "winmanifest",
+  ]
   pruneopts = "UT"
   revision = "867a9e5a498d85e2722730ed88c5f00560c7c354"
 
@@ -18,45 +21,12 @@
   version = "v1.1.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:47bb12a3430e260e91b3fa6e97ec869b0db83a862a3ed251d6244126ffd9b1a7"
-  name = "github.com/gotk3/gotk3"
-  packages = [
-    "cairo",
-    "gdk",
-    "glib",
-    "gtk",
-    "pango",
-  ]
-  pruneopts = "UT"
-  revision = "ac5a14d9e3ee26f53b88d0a99e59bf443d90e43e"
-
-[[projects]]
   digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
   version = "v1.0.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:aaf5bc1f3acae6506eeba7763db83ca43443eac79f8a5efd19e2bd67218910d1"
-  name = "github.com/lxn/walk"
-  packages = [
-    ".",
-    "declarative",
-  ]
-  pruneopts = "UT"
-  revision = "2ee9388367e00f3be6aa99780aff3954b04971a1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:04c7a467efd86783c42907225abf9a6e1d9a8cfbc6c9626693b0c89762bfd1e6"
-  name = "github.com/lxn/win"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "d19d56ae2f2d8e0b8e8e1d66a86a4d3e522524f7"
 
 [[projects]]
   digest = "1:dc2d85c13ac22c22a1f3170a41a8e1b897fa05134aaf533f16df44f66a25b4a1"
@@ -101,24 +71,13 @@
   pruneopts = "UT"
   revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
 
-[[projects]]
-  digest = "1:5d3e23515e7916c152cc665eda0f7eaf6fdf8fdfe7c3dbac97049bcbd649b33f"
-  name = "gopkg.in/Knetic/govaluate.v3"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "d216395917cc49052c7c7094cf57f09657ca08a8"
-  version = "v3.0.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/andlabs/ui",
+    "github.com/andlabs/ui/winmanifest",
     "github.com/golang/mock/gomock",
-    "github.com/gotk3/gotk3/gdk",
-    "github.com/gotk3/gotk3/gtk",
-    "github.com/lxn/walk",
-    "github.com/lxn/walk/declarative",
     "github.com/sirupsen/logrus",
     "gocv.io/x/gocv",
   ]

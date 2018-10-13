@@ -3,28 +3,30 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleExecutable</key>
-	<string>lipovision</string>
+	<string>LipoVision</string>
 	<key>CFBundleName</key>
-	<string>lipovision</string>
+	<string>LipoVision</string>
+	<key>CFBundleDisplayName</key>
+	<string>LipoVision</string>
+	<key>CFBundleGetInfoString</key>
+  	<string>LipoVision</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>CFBundleIdentifier</key>
+	<string>lt.sinbio.LipoVision</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>0.1</string>
+	<key>CFBundleIconFile</key>
+	<string>lipovision.icns</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>DTCompiler</key>
-	<string>com.apple.compilers.llvm.clang.1_0</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>10.14</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
-	<key>NSMainNibFile</key>
-	<string>MainMenu</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
 </dict>
 </plist>

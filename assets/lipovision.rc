@@ -1,3 +1,2 @@
-100 ICON    "lipovision.ico"
+100 ICON    "lipovision-win.ico"
 100 24      "lipovision.exe.manifest"
-101 RCDATA  "content.zip"

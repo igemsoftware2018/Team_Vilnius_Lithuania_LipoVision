@@ -57,8 +57,7 @@ install:
   - export INCLUDE_PATH=$HOME/usr/include:${INCLUDE_PATH}
   - export LD_LIBRARY_PATH=$HOME/usr/lib:${LD_LIBRARY_PATH}
   - mkdir build
-  - go build -ldflags '-s -w' -o build/lipovision
-  - cp $HOME/usr/lib/libopencv* build/
+  - .travis/build_project.sh
 before_script:
   - .travis/get_test_reporter.sh
   - chmod +x ./cc-test-reporter
