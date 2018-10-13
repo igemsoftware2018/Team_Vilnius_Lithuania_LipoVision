@@ -16,7 +16,7 @@ vendor/
 opencv/
 
 # Ignore project exec
-lipovision
+/lipovision
 
 # Ignore vscode (for now)
 .vscode

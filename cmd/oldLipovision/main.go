@@ -102,6 +102,7 @@ func main() {
 			subtract.Apply(croppedForAdd, &croppedForAdd)
 
 			biggestX := findBiggestXOfWhitePixel(&cropped)
+			log.Info("furthest right line: ", biggestX)
 
 			if isDanger(croppedForAdd, biggestX) {
 				gocv.PutText(&cropped, "DANGER!", image.Pt(cropped.Cols()/8, cropped.Rows()/4*3), 0, 0.3, color.RGBA{255, 255, 255, 9}, 1)
