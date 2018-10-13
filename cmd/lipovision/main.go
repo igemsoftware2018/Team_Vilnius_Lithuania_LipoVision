@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/gui"
-	"github.com/gotk3/gotk3/gtk"
+	"github.com/mattn/go-gtk/gtk"
 	log "github.com/sirupsen/logrus"
 )
 
