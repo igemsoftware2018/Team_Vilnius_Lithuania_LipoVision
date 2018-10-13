@@ -8,7 +8,14 @@ import (
 	"time"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device/dropletgenomics"
+	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.WarnLevel)
+}
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -44,7 +51,7 @@ Processing:
 				time.Sleep(time.Second)
 			}
 			for i := 0; i < device.NumPumps(); i++ {
-				fmt.Printf("Pump %d values: %f\n", i, device.Pump(i).Rate)
+				fmt.Printf("Pump %d values: %f\n", i, device.Pump(i))
 			}
 		}
 	}

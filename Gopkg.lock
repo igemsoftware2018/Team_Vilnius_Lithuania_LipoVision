@@ -2,14 +2,80 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:fca75464ffc131da4a1c76e80dddf3186ec16223963cdc0cfe05538349b24a94"
+  name = "github.com/andlabs/ui"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "867a9e5a498d85e2722730ed88c5f00560c7c354"
+
+[[projects]]
+  digest = "1:bc38c7c481812e178d85160472e231c5e1c9a7f5845d67e23ee4e706933c10d8"
+  name = "github.com/golang/mock"
+  packages = ["gomock"]
+  pruneopts = "UT"
+  revision = "c34cdb4725f4c3844d095133c6e40e448b86589b"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
+  digest = "1:dc2d85c13ac22c22a1f3170a41a8e1b897fa05134aaf533f16df44f66a25b4a1"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:b93f060beb06f5da4266b221314103bb4491a0003c607202c5fa14876b766b99"
   name = "gocv.io/x/gocv"
   packages = ["."]
+  pruneopts = "UT"
   revision = "3f4d73bc6a6e20e4880c0ea208f3e80880e1c725"
   version = "0.15.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  pruneopts = "UT"
+  revision = "e3636079e1a4c1f337f212cc5cd2aca108f6c900"
+
+[[projects]]
+  branch = "master"
+  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  pruneopts = "UT"
+  revision = "146acd28ed5894421fb5aac80ca93bc1b1f46f87"
+
+[[projects]]
+  branch = "master"
+  digest = "1:850d28ab022512e2cd3cf511a77f363c29e22689b4031f2050871f5de47ae4a0"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows",
+  ]
+  pruneopts = "UT"
+  revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ff111317fbeef46315fed535cec797ae828c7ed4a8ddc88b8a439bf8a6e88c0f"
+  input-imports = [
+    "github.com/andlabs/ui",
+    "github.com/golang/mock/gomock",
+    "github.com/sirupsen/logrus",
+    "gocv.io/x/gocv",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

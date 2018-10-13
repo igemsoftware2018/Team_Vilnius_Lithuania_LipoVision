@@ -30,6 +30,5 @@ func (s Subtract) Produce(frame gocv.Mat) (gocv.Mat, error) {
 //Apply Applies background subtraction to frame
 func (s Subtract) Apply(frame *gocv.Mat) error {
 	s.subtractor.Apply(*frame, frame)
-	gocv.Threshold(*frame, frame, 125, 255, gocv.ThresholdBinary)
 	return nil
 }

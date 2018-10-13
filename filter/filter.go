@@ -2,8 +2,8 @@ package filter
 
 import "gocv.io/x/gocv"
 
-//Filter Defines a computation on a frame,
-//that may do either noise removal or something else.
+// Filter Defines a computation on a frame,
+// that may do either noise removal or something else.
 type Filter interface {
 
 	//Produce Responsible for allocating a new frame with manipulations on it
@@ -13,9 +13,9 @@ type Filter interface {
 	Apply(*gocv.Mat) error
 }
 
-//ApplyFilters Applies a chain of manipulations on a frame.
-//The order of manipulations is the same as the slice.
-//Will stop midway if errors encountered.
+// ApplyFilters Applies a chain of manipulations on a frame.
+// The order of manipulations is the same as the slice.
+// Will stop midway if errors encountered.
 func ApplyFilters(frame *gocv.Mat, filters []Filter) error {
 	for _, filter := range filters {
 		err := filter.Apply(frame)
@@ -26,9 +26,9 @@ func ApplyFilters(frame *gocv.Mat, filters []Filter) error {
 	return nil
 }
 
-//CreateFrames Applies a slice of Filters, to produce a slice of frames.
-//The order of frames produces has to be the same as the order of input filters.
-//It will not complete if errors in filters will be encountered.
+// CreateFrames Applies a slice of Filters, to produce a slice of frames.
+// The order of frames produces has to be the same as the order of input filters.
+// It will not complete if errors in filters will be encountered.
 func CreateFrames(frame gocv.Mat, filters []Filter) ([]gocv.Mat, error) {
 	resultFrames := make([]gocv.Mat, len(filters))
 	for index, filter := range filters {

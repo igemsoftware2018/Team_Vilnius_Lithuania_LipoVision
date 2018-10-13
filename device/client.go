@@ -55,5 +55,5 @@ const (
 // invoke - Instruction from a table, to which the client will perform an action.
 // data   - The data that the instruction requires. Refer to the documentation of invoke constants, to what that should be
 type Client interface {
-	Invoke(invoke ClientInvocation, data interface{})
+	Invoke(invoke ClientInvocation, data interface{}) error
 }
