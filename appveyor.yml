@@ -46,7 +46,7 @@ build_script:
   - cd assets
   - windres -o ..\cmd\lipovision\lipovision-res.syso lipovision.rc
   - cd ..\cmd\lipovision
-  - go build -ldflags '-w' -o ../../build/LipoVision.exe
+  - go build -ldflags "-w -H windowsgui" -o ../../build/LipoVision.exe
   - cd ../../
   - robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/ || echo done
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
