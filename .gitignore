@@ -28,3 +28,6 @@ assets/lipovision.iconset/
 assets/*.syso
 
 LipoVision.app
+build/
+assets/lipovision.icns
+assets/lipovision.iconset

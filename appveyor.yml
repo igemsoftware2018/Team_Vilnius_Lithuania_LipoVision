@@ -43,10 +43,12 @@ build_script:
   - go test ./...
   - mkdir build
   - mkdir pkg
-  - cd cmd\lipovision
-  - windres -o lipovision-res.syso lipovision.rc
-  - go build -ldflags '-s -w' -o ../../build/LipoVision.exe
-  - robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/ ^ 3
+  - cd assets
+  - windres -o ..\cmd\lipovision\lipovision-res.syso lipovision.rc
+  - cd ..\cmd\lipovision
+  - go build -ldflags '-w' -o ../../build/LipoVision.exe
+  - cd ../../
+  - robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/ || echo done
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
   - PowerShell -Command "& Get-FileHash pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip -Algorithm MD5 > pkg/lipovision-%APPVEYOR_BUILD_VERSION%.md5"
 

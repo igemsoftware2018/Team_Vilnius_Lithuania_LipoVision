@@ -3,7 +3,7 @@
 
 
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then 
-    .travis/macos_build.sh
+    .travis/macos_build.sh $1 $2
 else
     cd cmd/lipovision
     go build -ldflags '-s -w' -o ../../build/lipovision

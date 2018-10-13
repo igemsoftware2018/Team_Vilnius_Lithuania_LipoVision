@@ -3,12 +3,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:72938f5cbc0208313aebf204dce11bc3ef2fad9453d89818656406e15fd38035"
+  digest = "1:fca75464ffc131da4a1c76e80dddf3186ec16223963cdc0cfe05538349b24a94"
   name = "github.com/andlabs/ui"
-  packages = [
-    ".",
-    "winmanifest",
-  ]
+  packages = ["."]
   pruneopts = "UT"
   revision = "867a9e5a498d85e2722730ed88c5f00560c7c354"
 
@@ -76,7 +73,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/andlabs/ui",
-    "github.com/andlabs/ui/winmanifest",
     "github.com/golang/mock/gomock",
     "github.com/sirupsen/logrus",
     "gocv.io/x/gocv",

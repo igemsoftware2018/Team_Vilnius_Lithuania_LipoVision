@@ -7,7 +7,10 @@ import (
 )
 
 const (
-	MainWindowWidth  int = 250
+	// MainWindowWidth sets the default width
+	MainWindowWidth int = 250
+
+	// MainWindowHeight sets the default height
 	MainWindowHeight int = 200
 )
 
@@ -41,6 +44,7 @@ type pumpForm struct {
 	entry *ui.Entry
 }
 
+// MainWindow is the main widgeted window for lipovision
 type MainWindow struct {
 	window *ui.Window
 	grid   *ui.Grid
