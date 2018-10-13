@@ -48,7 +48,7 @@ build_script:
   - cd ..\cmd\lipovision
   - go build -ldflags "-w -H windowsgui" -o ../../build/LipoVision.exe
   - cd ../../
-  - robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/ || echo done
+  - (robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/) ^& IF %ERRORLEVEL% LEQ 1 exit 0
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
   - PowerShell -Command "& Get-FileHash pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip -Algorithm MD5 > pkg/lipovision-%APPVEYOR_BUILD_VERSION%.md5"
 
