@@ -4,8 +4,7 @@
 pacman -Sy --needed \
     mingw-w64-x86_64-gtk3 \
     mingw-w64-x86_64-pkg-config \
-    mingw-w64-x86_64-ntldd-git \
-    shared-mime-info
+    mingw-w64-x86_64-ntldd-git
 
 # Fix pkg-config
 pushd /c/msys64/mingw64/lib/pkgconfig
