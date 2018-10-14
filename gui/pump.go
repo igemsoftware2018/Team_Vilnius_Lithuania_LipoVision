@@ -6,8 +6,8 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-// NewPumpControlsWidget returns pump control collection
-func NewPumpControlsWidget() (*PumpControlsWidget, error) {
+// NewPumpControl returns pump control collection
+func NewPumpControl() (*PumpControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	if boxErr != nil {
 		return nil, boxErr
@@ -29,7 +29,7 @@ func NewPumpControlsWidget() (*PumpControlsWidget, error) {
 	}
 
 	frame.Add(box)
-	return &PumpControlsWidget{rootBox: frame, pumps: pumps}, nil
+	return &PumpControl{rootBox: frame, pumps: pumps}, nil
 }
 
 func newPumpItem(index int) (gtk.IWidget, error) {
@@ -55,15 +55,15 @@ func newPumpItem(index int) (gtk.IWidget, error) {
 	return box, nil
 }
 
-// PumpControlsWidget is the pump control collection
-type PumpControlsWidget struct {
-	Widget
+// PumpControl is the pump control collection
+type PumpControl struct {
+	Control
 
 	rootBox *gtk.Frame
 	pumps   []gtk.IWidget
 }
 
-// Widget returns the root stack component
-func (pc *PumpControlsWidget) Root() gtk.IWidget {
+// Root returns the root stack component
+func (pc *PumpControl) Root() gtk.IWidget {
 	return pc.rootBox
 }

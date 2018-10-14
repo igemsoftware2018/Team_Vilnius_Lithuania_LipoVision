@@ -5,8 +5,8 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-// NewStreamWidget returns the stream widget collection
-func NewStreamWidget() (*StreamWidget, error) {
+// NewStreamControl returns the stream widget collection
+func NewStreamControl() (*StreamControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	if boxErr != nil {
 		return nil, boxErr
@@ -22,9 +22,9 @@ func NewStreamWidget() (*StreamWidget, error) {
 	if streamErr != nil {
 		return nil, streamErr
 	}
-	box.PackStart(streamWindow, false, true, 0)
+	box.PackStart(streamWindow, true, true, 0)
 
-	return &StreamWidget{rootBox: box}, nil
+	return &StreamControl{rootBox: box}, nil
 }
 
 func newOptionsBox() (gtk.IWidget, error) {
@@ -69,9 +69,9 @@ func newStreamWindow() (gtk.IWidget, error) {
 	return frame, nil
 }
 
-// StreamWidget contains the stream window and device controls
-type StreamWidget struct {
-	Widget
+// StreamControl contains the stream window and device controls
+type StreamControl struct {
+	Control
 
 	// VBox splits the stream window from devices
 	rootBox *gtk.Box
@@ -86,6 +86,7 @@ type StreamWidget struct {
 	pixbufLoader *gdk.PixbufLoader
 }
 
-func (sw *StreamWidget) Root() gtk.IWidget {
+// Root returns the root widget
+func (sw *StreamControl) Root() gtk.IWidget {
 	return sw.rootBox
 }
