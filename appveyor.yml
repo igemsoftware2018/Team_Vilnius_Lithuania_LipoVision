@@ -12,6 +12,8 @@ environment:
   GOROOT: c:\go
   GOVERSION: 1.10.3
   TEST_EXTERNAL: 1
+  PKG_CONFIG_PATH: C:\msys64\mingw64\lib\pkgconfig
+  CGO_LDFLAGS_ALLOW: -Wl,-luuid
   APPVEYOR_SAVE_CACHE_ON_ERROR: false
 
 cache:

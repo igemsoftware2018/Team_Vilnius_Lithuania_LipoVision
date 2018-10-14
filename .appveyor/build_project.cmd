@@ -1,6 +1,4 @@
 set PATH=%PATH%;C:\msys64\mingw64\bin
-set PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig
-set CGO_LDFLAGS_ALLOW="-Wl,-luuid"
 
 mkdir build
 mkdir pkg
