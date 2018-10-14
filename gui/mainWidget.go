@@ -22,6 +22,7 @@ func NewMainWidget() (*MainWidget, error) {
 	}
 	box.PackEnd(pumpControlsWidget.Root(), false, true, 0)
 
+	box.ShowAll()
 	return &MainWidget{rootBox: box}, nil
 }
 

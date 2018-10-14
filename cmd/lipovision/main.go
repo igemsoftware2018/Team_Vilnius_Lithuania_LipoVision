@@ -29,6 +29,7 @@ func main() {
 		gtk.MainQuit()
 	})
 	win.SetDefaultSize(890, 500)
+	win.SetResizable(false)
 
 	content, err := gui.NewMainWidget()
 	if err != nil {
