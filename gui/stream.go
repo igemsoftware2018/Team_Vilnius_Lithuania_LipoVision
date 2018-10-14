@@ -12,7 +12,7 @@ func NewStreamControl() (*StreamControl, error) {
 		return nil, boxErr
 	}
 
-	optsBox, optsErr := newOptionsBox()
+	optsBox, comboBox, optsErr := newOptionsBox()
 	if optsErr != nil {
 		return nil, optsErr
 	}
@@ -24,42 +24,46 @@ func NewStreamControl() (*StreamControl, error) {
 	}
 	box.PackStart(streamWindow, true, true, 0)
 
-	return &StreamControl{rootBox: box}, nil
+	return &StreamControl{rootBox: box, comboBox: comboBox}, nil
 }
 
-func packDeviceSelector(box *gtk.Box) error {
+func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {
 	devicesLabel, labelErr := gtk.LabelNew("Device: ")
 	if labelErr != nil {
-		return labelErr
+		return nil, nil, labelErr
 	}
-	box.PackStart(devicesLabel, false, false, 0)
 
-	devicesCombo, comboErr := gtk.ComboBoxNew()
+	devicesCombo, comboErr := gtk.ComboBoxTextNew()
 	if comboErr != nil {
-		return comboErr
+		return nil, nil, comboErr
 	}
-	box.PackStart(devicesCombo, false, false, 0)
-	return nil
+
+	devicesCombo.AppendText("dropletgenomics")
+	devicesCombo.AppendText("video")
+
+	return devicesLabel, devicesCombo, nil
 }
 
-func newOptionsBox() (gtk.IWidget, error) {
+func newOptionsBox() (gtk.IWidget, *gtk.ComboBoxText, error) {
 	frame, frameErr := gtk.FrameNew("Device options")
 	if frameErr != nil {
-		return nil, frameErr
+		return nil, nil, frameErr
 	}
 
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	if boxErr != nil {
-		return nil, boxErr
+		return nil, nil, boxErr
 	}
 
-	packErr := packDeviceSelector(box)
-	if packErr != nil {
-		return nil, packErr
+	devicesLabel, comboBox, comboBoxErr := packDeviceSelector()
+	if comboBoxErr != nil {
+		return nil, nil, comboBoxErr
 	}
+	box.PackStart(devicesLabel, false, false, 0)
+	box.PackStart(comboBox, false, false, 0)
 
 	frame.Add(box)
-	return frame, nil
+	return frame, comboBox, nil
 }
 
 func newStreamWindow() (gtk.IWidget, error) {
@@ -86,6 +90,7 @@ type StreamControl struct {
 
 	// Device controls
 	optionsBox *gtk.Box
+	comboBox   *gtk.ComboBoxText
 
 	// Stream
 	image *gtk.Image

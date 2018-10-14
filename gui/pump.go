@@ -6,6 +6,30 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+// NewPumpAndRegionContainer creates a box container for
+// both RegionControl and PumpControl
+func NewPumpAndRegionContainer() (gtk.IWidget, error) {
+	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
+	if boxErr != nil {
+		return nil, boxErr
+	}
+
+	region, regionErr := NewRegionControl()
+	if regionErr != nil {
+		return nil, regionErr
+	}
+
+	pumpControl, pumpControlErr := NewPumpControl()
+	if pumpControlErr != nil {
+		return nil, pumpControlErr
+	}
+
+	box.PackStart(pumpControl.Root(), true, true, 0)
+	box.PackEnd(region.Root(), false, true, 0)
+
+	return box, nil
+}
+
 // NewPumpControl returns pump control collection
 func NewPumpControl() (*PumpControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
@@ -29,6 +53,7 @@ func NewPumpControl() (*PumpControl, error) {
 	}
 
 	frame.Add(box)
+
 	return &PumpControl{rootBox: frame, pumps: pumps}, nil
 }
 

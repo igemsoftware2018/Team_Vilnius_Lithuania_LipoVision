@@ -15,11 +15,11 @@ func NewMainControl() (*MainControl, error) {
 	}
 	box.PackStart(streamWidget.Root(), true, true, 2)
 
-	pumpControlsWidget, pumpControlsWidgetErr := NewPumpControl()
-	if pumpControlsWidgetErr != nil {
-		return nil, pumpControlsWidgetErr
+	pumpAndRegion, pumpAndRegionErr := NewPumpAndRegionContainer()
+	if pumpAndRegionErr != nil {
+		return nil, pumpAndRegionErr
 	}
-	box.PackEnd(pumpControlsWidget.Root(), false, true, 2)
+	box.PackEnd(pumpAndRegion, false, true, 2)
 
 	box.ShowAll()
 	return &MainControl{rootBox: box}, nil
