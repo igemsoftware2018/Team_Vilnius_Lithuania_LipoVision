@@ -29,6 +29,9 @@ func NewMainControl() (*MainControl, error) {
 type MainControl struct {
 	Control
 
+	// StreamControl is the
+	StreamControl *StreamControl
+
 	// HBox is the hozirontal layout
 	// Stream window and device selectors on the left
 	// Pump controls on the right

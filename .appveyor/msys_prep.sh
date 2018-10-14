@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Deps
-pacman -Sy --needed \
+pacman -Sy --needed --noconfirm \
     mingw-w64-x86_64-gtk3 \
     mingw-w64-x86_64-pkg-config \
     mingw-w64-x86_64-ntldd-git

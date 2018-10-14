@@ -90,10 +90,10 @@ type StreamControl struct {
 
 	// Device controls
 	optionsBox *gtk.Box
-	comboBox   *gtk.ComboBoxText
 
-	// Stream
-	image *gtk.Image
+	// ComboBox must be accessible
+	ComboBox *gtk.ComboBoxText
+	image    *gtk.Image
 
 	// Stream frame loader
 	pixbufLoader *gdk.PixbufLoader

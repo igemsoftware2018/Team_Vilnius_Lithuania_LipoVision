@@ -29,6 +29,8 @@ addons:
     - build-essential
     - cmake
     - git
+    - gtk2.0
+    - gtk+3.0
     - libgtk2.0-dev
     - libgtk-3-dev
     - pkg-config

@@ -25,6 +25,7 @@ type RegionControl struct {
 	rootFrame *gtk.Frame
 }
 
+// Root returns the root element of this control
 func (rc RegionControl) Root() gtk.IWidget {
 	return rc.rootFrame
 }
