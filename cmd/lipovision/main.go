@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/gui"
-	"github.com/mattn/go-gtk/gtk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,5 +20,4 @@ func main() {
 	}
 
 	gui.Compose()
-	gtk.Main()
 }
