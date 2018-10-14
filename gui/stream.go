@@ -27,6 +27,21 @@ func NewStreamControl() (*StreamControl, error) {
 	return &StreamControl{rootBox: box}, nil
 }
 
+func packDeviceSelector(box *gtk.Box) error {
+	devicesLabel, labelErr := gtk.LabelNew("Device: ")
+	if labelErr != nil {
+		return labelErr
+	}
+	box.PackStart(devicesLabel, false, false, 0)
+
+	devicesCombo, comboErr := gtk.ComboBoxNew()
+	if comboErr != nil {
+		return comboErr
+	}
+	box.PackStart(devicesCombo, false, false, 0)
+	return nil
+}
+
 func newOptionsBox() (gtk.IWidget, error) {
 	frame, frameErr := gtk.FrameNew("Device options")
 	if frameErr != nil {
@@ -38,17 +53,10 @@ func newOptionsBox() (gtk.IWidget, error) {
 		return nil, boxErr
 	}
 
-	devicesLabel, labelErr := gtk.LabelNew("Devices: ")
-	if labelErr != nil {
-		return nil, labelErr
+	packErr := packDeviceSelector(box)
+	if packErr != nil {
+		return nil, packErr
 	}
-	box.PackStart(devicesLabel, false, false, 0)
-
-	devicesCombo, comboErr := gtk.ComboBoxNew()
-	if comboErr != nil {
-		return nil, comboErr
-	}
-	box.PackStart(devicesCombo, false, false, 0)
 
 	frame.Add(box)
 	return frame, nil
