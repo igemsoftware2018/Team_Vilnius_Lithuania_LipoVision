@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-
-
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then 
     .travis/macos_build.sh $1 $2
 else
