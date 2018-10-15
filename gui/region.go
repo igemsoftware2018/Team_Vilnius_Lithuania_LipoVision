@@ -4,7 +4,7 @@ import "github.com/gotk3/gotk3/gtk"
 
 // NewRegionControl creates a control widget
 func NewRegionControl() (*RegionControl, error) {
-	frame, frameErr := gtk.FrameNew("Reference frame")
+	frame, frameErr := gtk.FrameNew("Reference stream")
 	if frameErr != nil {
 		return nil, frameErr
 	}

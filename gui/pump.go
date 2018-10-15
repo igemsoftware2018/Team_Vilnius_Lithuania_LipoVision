@@ -14,17 +14,22 @@ func NewPumpAndRegionContainer() (gtk.IWidget, *RegionControl, error) {
 		return nil, nil, boxErr
 	}
 
-	region, regionErr := NewRegionControl()
-	if regionErr != nil {
-		return nil, nil, regionErr
-	}
-
 	pumpControl, pumpControlErr := NewPumpControl()
 	if pumpControlErr != nil {
 		return nil, nil, pumpControlErr
 	}
-
 	box.PackStart(pumpControl.Root(), true, true, 0)
+
+	cameraControl, cameraControlErr := NewCameraConrol()
+	if cameraControlErr != nil {
+		return nil, nil, cameraControlErr
+	}
+	box.PackStart(cameraControl.Root(), true, true, 0)
+
+	region, regionErr := NewRegionControl()
+	if regionErr != nil {
+		return nil, nil, regionErr
+	}
 	box.PackEnd(region.Root(), false, true, 0)
 
 	return box, region, nil
