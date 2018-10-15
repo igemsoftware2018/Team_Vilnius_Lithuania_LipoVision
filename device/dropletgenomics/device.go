@@ -85,6 +85,7 @@ func (Device) Stream(ctx context.Context) <-chan device.Frame {
 			select {
 			case <-ctx.Done():
 				fmt.Printf("%s\n", "Stream closed")
+				close(stream)
 				complete = true
 			default:
 				response, err := client.Get(streamEndpoint)

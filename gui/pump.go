@@ -3,13 +3,12 @@ package gui
 import (
 	"fmt"
 
-	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 // NewPumpAndRegionContainer creates a box container for
 // both RegionControl and PumpControl
-func NewPumpAndRegionContainer(device *device.Device) (gtk.IWidget, *RegionControl, error) {
+func NewPumpAndRegionContainer() (gtk.IWidget, *RegionControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	if boxErr != nil {
 		return nil, nil, boxErr

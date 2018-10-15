@@ -37,12 +37,14 @@ func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
 		for {
 			select {
 			case <-ctx.Done():
+				close(stream)
 				break FrameFetch
 			default:
 				frame := gocv.NewMat()
 				if !capture.Read(&frame) {
-					log.Warn("could not read frame from video")
-					continue
+					log.Warn("could not read frame from video, possibly last frame")
+					close(stream)
+					break FrameFetch
 				}
 
 				img, err := frame.ToImage()

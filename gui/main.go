@@ -1,24 +1,23 @@
 package gui
 
 import (
-	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 // NewMainControl makes the widget
-func NewMainControl(device *device.Device) (*MainControl, error) {
+func NewMainControl() (*MainControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	if boxErr != nil {
 		return nil, boxErr
 	}
 
-	streamWidget, streamWidgetErr := NewStreamControl(device)
+	streamWidget, streamWidgetErr := NewStreamControl()
 	if streamWidgetErr != nil {
 		return nil, streamWidgetErr
 	}
 	box.PackStart(streamWidget.Root(), true, true, 2)
 
-	pumpAndRegion, regionStream, pumpAndRegionErr := NewPumpAndRegionContainer(device)
+	pumpAndRegion, regionStream, pumpAndRegionErr := NewPumpAndRegionContainer()
 	if pumpAndRegionErr != nil {
 		return nil, pumpAndRegionErr
 	}

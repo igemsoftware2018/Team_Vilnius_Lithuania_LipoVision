@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
-	"strings"
+	"context"
+	"image"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device/dropletgenomics"
@@ -12,7 +12,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func newDeviceWithChosenVideo(win *gtk.Window) device.Device {
+var (
+	mainCtx    context.Context
+	mainCancel context.CancelFunc
+)
+
+func chooseFileCreateDevice(win *gtk.Window) device.Device {
 	chooser, err := gtk.FileChooserDialogNewWith1Button(
 		"Select video file", win, gtk.FILE_CHOOSER_ACTION_OPEN,
 		"Open", gtk.RESPONSE_ACCEPT)
@@ -34,15 +39,7 @@ func newDeviceWithChosenVideo(win *gtk.Window) device.Device {
 }
 
 func main() {
-	deviceRequested := flag.String("device", "",
-		`Specify a device to run the program with. Valid values:
-	 	 > dropletgenomics
-		  > video`)
-	flag.Parse()
-
-	if strings.Compare("", *deviceRequested) != 0 {
-		log.Info("selected device: ", *deviceRequested)
-	}
+	mainCtx, mainCancel = context.WithCancel(context.Background())
 
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
@@ -50,12 +47,13 @@ func main() {
 	}
 	win.SetTitle("LipoVision")
 	win.Connect("destroy", func() {
+		mainCancel()
 		gtk.MainQuit()
 	})
 	win.SetDefaultSize(890, 500)
 
 	var device device.Device
-	content, err := gui.NewMainControl(&device)
+	content, err := gui.NewMainControl()
 	if err != nil {
 		panic(err)
 	}
@@ -63,10 +61,12 @@ func main() {
 	win.ShowAll()
 
 	content.StreamControl.ComboBox.Connect("changed", func(combo *gtk.ComboBoxText) {
+		mainCancel()
+		mainCtx, mainCancel = context.WithCancel(context.Background())
 		selection := combo.GetActiveText()
 		switch selection {
 		case "Video file...":
-			device = newDeviceWithChosenVideo(win)
+			device = chooseFileCreateDevice(win)
 		case "DropletGenomics":
 			device = dropletgenomics.Create(4)
 		default:
@@ -75,7 +75,32 @@ func main() {
 				"Chosen device %s, does not exist", selection)
 			errDialog.Run()
 		}
+
+		imageStream := make(chan image.Image, 10)
+		go content.StreamControl.ShowStream(imageStream)
+
+		go func() {
+			log.Info("Stream processor started")
+			streamCtx, streamCancel := context.WithCancel(mainCtx)
+			deviceStream := device.Stream(streamCtx)
+		Process:
+			for {
+				select {
+				case <-streamCtx.Done():
+					break Process
+				case frame, ok := <-deviceStream:
+					if ok {
+						imageStream <- frame.Frame()
+					} else {
+						break Process
+					}
+				}
+			}
+			streamCancel()
+			log.Info("Stream processor exited")
+		}()
 	})
 
 	gtk.Main()
+	mainCancel()
 }

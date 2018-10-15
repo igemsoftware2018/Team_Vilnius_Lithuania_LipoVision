@@ -1,13 +1,18 @@
 package gui
 
 import (
+	"bytes"
+	"image"
+	"image/png"
+
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
+	log "github.com/sirupsen/logrus"
 )
 
 // NewStreamControl returns the stream widget collection
-func NewStreamControl(device *device.Device) (*StreamControl, error) {
+func NewStreamControl() (*StreamControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	if boxErr != nil {
 		return nil, boxErr
@@ -19,13 +24,13 @@ func NewStreamControl(device *device.Device) (*StreamControl, error) {
 	}
 	box.PackStart(optsBox, false, false, 0)
 
-	streamWindow, streamErr := newStreamWindow()
+	streamWindow, image, streamErr := newStreamWindow()
 	if streamErr != nil {
 		return nil, streamErr
 	}
 	box.PackStart(streamWindow, true, true, 0)
 
-	return &StreamControl{rootBox: box, ComboBox: comboBox}, nil
+	return &StreamControl{rootBox: box, ComboBox: comboBox, image: image}, nil
 }
 
 func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {
@@ -67,19 +72,19 @@ func newOptionsBox() (gtk.IWidget, *gtk.ComboBoxText, error) {
 	return frame, comboBox, nil
 }
 
-func newStreamWindow() (gtk.IWidget, error) {
+func newStreamWindow() (gtk.IWidget, *gtk.Image, error) {
 	frame, frameErr := gtk.FrameNew("Device stream")
 	if frameErr != nil {
-		return nil, frameErr
+		return nil, nil, frameErr
 	}
 
-	image, imgErr := gtk.ImageNewFromFile("template-intersection.png")
+	image, imgErr := gtk.ImageNew()
 	if imgErr != nil {
-		return nil, imgErr
+		return nil, nil, imgErr
 	}
 
 	frame.Add(image)
-	return frame, nil
+	return frame, image, nil
 }
 
 // StreamControl contains the stream window and device controls
@@ -98,9 +103,30 @@ type StreamControl struct {
 
 	// Stream frame loader
 	pixbufLoader *gdk.PixbufLoader
+
+	device device.Device
 }
 
 // Root returns the root widget
 func (sw *StreamControl) Root() gtk.IWidget {
 	return sw.rootBox
+}
+
+// ShowStream starts a goroutine that updates the image
+func (sw *StreamControl) ShowStream(stream <-chan image.Image) {
+	for frame := range stream {
+		buffer := new(bytes.Buffer)
+		png.Encode(buffer, frame)
+		loader, err := gdk.PixbufLoaderNew()
+		if err != nil {
+			log.Fatal("Failed to create loader for images")
+			return
+		}
+		pixbuf, loadErr := loader.WriteAndReturnPixbuf(buffer.Bytes())
+		if loadErr != nil {
+			log.Warn("Failed to load image onto screen")
+			continue
+		}
+		sw.image.SetFromPixbuf(pixbuf)
+	}
 }
