@@ -3,12 +3,10 @@ package dropletgenomics
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"image/png"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
@@ -80,27 +78,33 @@ func (Device) Stream(ctx context.Context) <-chan device.Frame {
 
 	stream := make(chan device.Frame, 20)
 	go func() {
-		complete := false
-		for !complete {
+	Dispatch:
+		for {
 			select {
 			case <-ctx.Done():
-				fmt.Printf("%s\n", "Stream closed")
 				close(stream)
-				complete = true
+				log.WithFields(log.Fields{
+					"device": "DropletGenomics",
+				}).Info("Stream closing")
+				break Dispatch
 			default:
 				response, err := client.Get(streamEndpoint)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to connect to stream: %s\n", err)
+					log.WithFields(log.Fields{
+						"device": "DropletGenomics",
+					}).Warn("Failed to connect to stream")
 					time.Sleep(time.Second)
 					continue
 				}
-				fmt.Printf("%s\n", "Connected to stream")
+				log.WithFields(log.Fields{
+					"device": "DropletGenomics",
+				}).Info("Connected to stream")
 
 				byteStream := response.Body
 				for {
 					img, err := decodeFrame(byteStream)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "decode error: %s", err)
+						log.Warn("Decode error")
 						break
 					}
 

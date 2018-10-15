@@ -12,8 +12,12 @@ import (
 
 // Create returns a video.Device configured with given setttings
 func Create(videoPath string, framerate int) Device {
-	log.Info("video file set as: ", videoPath)
-	log.Info("framerate set as: ", framerate)
+	log.WithFields(log.Fields{
+		"device": "Video"
+	}).Info("video file set as: ", videoPath)
+	log.WithFields(log.Fields{
+		"device": "Video"
+	}).Info("framerate set as: ", framerate)
 	return Device{videoPath: videoPath,
 		camera: Camera{FrameRate: framerate}}
 }
@@ -42,14 +46,18 @@ func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
 			default:
 				frame := gocv.NewMat()
 				if !capture.Read(&frame) {
-					log.Warn("could not read frame from video, possibly last frame")
 					close(stream)
+					log.WithFields(log.Fields{
+						"device": "Video"
+					}).Info("Video device stream closed")
 					break FrameFetch
 				}
 
 				img, err := frame.ToImage()
 				if err != nil {
-					log.Warn("could not convert gocv.Mat to image.Image")
+					log.WithFields(log.Fields{
+						"device": "Video"
+					}).Warn("could not convert gocv.Mat to image.Image")
 					continue
 				}
 				stream <- Frame{frame: img}

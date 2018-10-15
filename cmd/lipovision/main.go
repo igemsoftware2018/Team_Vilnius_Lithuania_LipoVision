@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	mainCtx    context.Context
-	mainCancel context.CancelFunc
+	mainCtx      context.Context
+	mainCancel   context.CancelFunc
+	activeDevice device.Device
 )
 
 func chooseFileCreateDevice(win *gtk.Window) device.Device {
@@ -40,6 +41,7 @@ func chooseFileCreateDevice(win *gtk.Window) device.Device {
 
 func main() {
 	mainCtx, mainCancel = context.WithCancel(context.Background())
+	defer mainCancel()
 
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
@@ -52,7 +54,6 @@ func main() {
 	})
 	win.SetDefaultSize(890, 500)
 
-	var device device.Device
 	content, err := gui.NewMainControl()
 	if err != nil {
 		panic(err)
@@ -60,15 +61,21 @@ func main() {
 	win.Add(content.Root())
 	win.ShowAll()
 
+	registerDeviceChange(content, win)
+
+	gtk.Main()
+}
+
+func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 	content.StreamControl.ComboBox.Connect("changed", func(combo *gtk.ComboBoxText) {
 		mainCancel()
 		mainCtx, mainCancel = context.WithCancel(context.Background())
 		selection := combo.GetActiveText()
 		switch selection {
 		case "Video file...":
-			device = chooseFileCreateDevice(win)
+			activeDevice = chooseFileCreateDevice(win)
 		case "DropletGenomics":
-			device = dropletgenomics.Create(4)
+			activeDevice = dropletgenomics.Create(4)
 		default:
 			errDialog := gtk.MessageDialogNew(win, gtk.DIALOG_MODAL,
 				gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
@@ -80,9 +87,13 @@ func main() {
 		go content.StreamControl.ShowStream(imageStream)
 
 		go func() {
-			log.Info("Stream processor started")
+			log.WithFields(log.Fields{
+				"device": selection
+			}).Info("Stream processor started")
 			streamCtx, streamCancel := context.WithCancel(mainCtx)
-			deviceStream := device.Stream(streamCtx)
+			deviceStream := activeDevice.Stream(streamCtx)
+			defer streamCancel()
+			defer close(imageStream)
 		Process:
 			for {
 				select {
@@ -96,11 +107,9 @@ func main() {
 					}
 				}
 			}
-			streamCancel()
-			log.Info("Stream processor exited")
+			log.WithFields(log.Fields{
+				"device": selection
+			}).Info("Stream processor exited")
 		}()
 	})
-
-	gtk.Main()
-	mainCancel()
 }
