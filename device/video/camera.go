@@ -8,6 +8,8 @@ import (
 
 // Camera defines a "camera" for the video device
 type Camera struct {
+	device.Client
+
 	FrameRate int
 }
 

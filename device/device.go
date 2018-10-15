@@ -27,4 +27,10 @@ type Device interface {
 
 	// Available Checks if device is available
 	Available() bool
+
+	// Camera returns the camera client
+	Camera() Client
+
+	// Pump returns pump client by pump ID
+	Pump(int) Client
 }

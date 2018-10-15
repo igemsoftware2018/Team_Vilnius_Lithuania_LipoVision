@@ -8,31 +8,31 @@ import (
 
 // NewPumpAndRegionContainer creates a box container for
 // both RegionControl and PumpControl
-func NewPumpAndRegionContainer() (gtk.IWidget, *RegionControl, error) {
+func NewPumpAndRegionContainer() (gtk.IWidget, *PumpControl, *CameraControl, *RegionControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	if boxErr != nil {
-		return nil, nil, boxErr
+		return nil, nil, nil, nil, boxErr
 	}
 
 	pumpControl, pumpControlErr := NewPumpControl()
 	if pumpControlErr != nil {
-		return nil, nil, pumpControlErr
+		return nil, nil, nil, nil, pumpControlErr
 	}
 	box.PackStart(pumpControl.Root(), false, false, 0)
 
 	cameraControl, cameraControlErr := NewCameraConrol()
 	if cameraControlErr != nil {
-		return nil, nil, cameraControlErr
+		return nil, nil, nil, nil, cameraControlErr
 	}
 	box.PackStart(cameraControl.Root(), false, false, 0)
 
 	region, regionErr := NewRegionControl()
 	if regionErr != nil {
-		return nil, nil, regionErr
+		return nil, nil, nil, nil, regionErr
 	}
 	box.PackEnd(region.Root(), true, true, 0)
 
-	return box, region, nil
+	return box, pumpControl, cameraControl, region, nil
 }
 
 // NewPumpControl returns pump control collection

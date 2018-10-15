@@ -19,13 +19,13 @@ func Create(videoPath string, framerate int) Device {
 		"device": "Video",
 	}).Info("framerate set as: ", framerate)
 	return Device{videoPath: videoPath,
-		camera: Camera{FrameRate: framerate}}
+		camera: &Camera{FrameRate: framerate}}
 }
 
 // Device defines a mock device for gocv video retrieval
 type Device struct {
 	videoPath string
-	camera    Camera
+	camera    *Camera
 }
 
 // Stream fetches frames on certain times, to mimic stream
@@ -72,4 +72,14 @@ func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
 // a video file is always reachable
 func (Device) Available() bool {
 	return true
+}
+
+// Return the 'camera'
+func (dev Device) Camera() device.Client {
+	return dev.camera
+}
+
+// Pump returns a fake pump no matter what
+func (dev Device) Pump(index int) device.Client {
+	return NewPump()
 }

@@ -42,6 +42,8 @@ func Create(usedPumps int) *Device {
 
 // Device is DropletGenomics' rendition of microfluidics devices
 type Device struct {
+	device.Device
+
 	pumpExperiment int
 	pumps          []Pump
 	camera         Camera

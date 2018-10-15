@@ -37,12 +37,14 @@ func NewCameraConrol() (*CameraControl, error) {
 	box.PackStart(autoAdjButton, true, false, 5)
 
 	frame.Add(box)
-	return &CameraControl{rootFrame: frame}, nil
+	return &CameraControl{rootFrame: frame, AutoAdjButton: autoAdjButton}, nil
 }
 
 // CameraControl is a collection of controls for the camera
 type CameraControl struct {
 	Control
+
+	AutoAdjButton *gtk.Button
 
 	rootFrame *gtk.Frame
 }

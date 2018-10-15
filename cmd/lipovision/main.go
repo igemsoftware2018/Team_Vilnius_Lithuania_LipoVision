@@ -62,8 +62,15 @@ func main() {
 	win.ShowAll()
 
 	registerDeviceChange(content, win)
+	registerAutoAdjustHandling(content, win)
 
 	gtk.Main()
+}
+
+func registerAutoAdjustHandling(content *gui.MainControl, win *gtk.Window) {
+	content.Camera.AutoAdjButton.Connect("clicked", func() {
+		activeDevice.Camera().Invoke(device.CameraAutoAdjust, nil)
+	})
 }
 
 func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
