@@ -26,6 +26,8 @@ popd
 
 cp template-intersection.png $BIN_FOLDER/
 cp $OPENCV_BUILD/libopencv_*$OPENCV_POSTFIX $BIN_FOLDER
+cp /usr/local/opt/fontconfig/lib/lib* $BIN_FOLDER
+cp /usr/local/opt/freetype/lib/lib* $BIN_FOLDER
 
 dylibs=($BIN_FOLDER/libopencv_*)
 for lib in "${dylibs[@]}"
