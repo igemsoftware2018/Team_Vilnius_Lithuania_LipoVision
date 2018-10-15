@@ -8,26 +8,26 @@ import (
 
 // NewPumpAndRegionContainer creates a box container for
 // both RegionControl and PumpControl
-func NewPumpAndRegionContainer() (gtk.IWidget, error) {
+func NewPumpAndRegionContainer() (gtk.IWidget, *RegionControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	if boxErr != nil {
-		return nil, boxErr
+		return nil, nil, boxErr
 	}
 
 	region, regionErr := NewRegionControl()
 	if regionErr != nil {
-		return nil, regionErr
+		return nil, nil, regionErr
 	}
 
 	pumpControl, pumpControlErr := NewPumpControl()
 	if pumpControlErr != nil {
-		return nil, pumpControlErr
+		return nil, nil, pumpControlErr
 	}
 
 	box.PackStart(pumpControl.Root(), true, true, 0)
 	box.PackEnd(region.Root(), false, true, 0)
 
-	return box, nil
+	return box, region, nil
 }
 
 // NewPumpControl returns pump control collection

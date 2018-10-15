@@ -24,7 +24,7 @@ func NewStreamControl() (*StreamControl, error) {
 	}
 	box.PackStart(streamWindow, true, true, 0)
 
-	return &StreamControl{rootBox: box, comboBox: comboBox}, nil
+	return &StreamControl{rootBox: box, ComboBox: comboBox}, nil
 }
 
 func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {

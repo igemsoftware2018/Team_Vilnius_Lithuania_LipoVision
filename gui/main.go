@@ -15,22 +15,23 @@ func NewMainControl() (*MainControl, error) {
 	}
 	box.PackStart(streamWidget.Root(), true, true, 2)
 
-	pumpAndRegion, pumpAndRegionErr := NewPumpAndRegionContainer()
+	pumpAndRegion, regionStream, pumpAndRegionErr := NewPumpAndRegionContainer()
 	if pumpAndRegionErr != nil {
 		return nil, pumpAndRegionErr
 	}
 	box.PackEnd(pumpAndRegion, false, true, 2)
 
 	box.ShowAll()
-	return &MainControl{rootBox: box}, nil
+	return &MainControl{rootBox: box, StreamControl: streamWidget, RegionStream: regionStream}, nil
 }
 
 // MainControl is the root widget of the main window
 type MainControl struct {
 	Control
 
-	// StreamControl is the
+	// Contained elements of main window
 	StreamControl *StreamControl
+	RegionStream  *RegionControl
 
 	// HBox is the hozirontal layout
 	// Stream window and device selectors on the left
