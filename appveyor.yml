@@ -47,9 +47,9 @@ build_script:
   - set PATH=%PATH%;C:\msys64\mingw64\bin
   - set PATH=%PATH%;%GOPATH%\bin
   - go generate ./...
-  - go test ./...
+  - go test -tags gtk_3_10 ./...
   - .appveyor/build_project.cmd
-  - (robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+  - xcopy  C:\opencv\build\install\x64\mingw\bin\* build\ /s /i
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
   - PowerShell -Command "& Get-FileHash pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip -Algorithm MD5 > pkg/lipovision-%APPVEYOR_BUILD_VERSION%.md5"
 
