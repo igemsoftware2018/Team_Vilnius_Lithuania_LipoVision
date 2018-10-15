@@ -72,13 +72,13 @@ func removeTrail(stream io.ReadCloser) {
 }
 
 // Stream launches async stream decoding of ctx lifetime
-func (Device) Stream(ctx context.Context) <-chan Frame {
+func (Device) Stream(ctx context.Context) <-chan device.Frame {
 	const (
 		streamEndpoint string = "http://192.168.1.100:8765/video_feed"
 		frameRate      int    = 20
 	)
 
-	stream := make(chan Frame, 20)
+	stream := make(chan device.Frame, 20)
 	go func() {
 		complete := false
 		for !complete {

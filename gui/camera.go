@@ -2,6 +2,7 @@ package gui
 
 import "github.com/gotk3/gotk3/gtk"
 
+// NewCameraConrol returns the camera controls collection
 func NewCameraConrol() (*CameraControl, error) {
 	frame, frameErr := gtk.FrameNew("Camera contols")
 	if frameErr != nil {
@@ -39,12 +40,14 @@ func NewCameraConrol() (*CameraControl, error) {
 	return &CameraControl{rootFrame: frame}, nil
 }
 
+// CameraControl is a collection of controls for the camera
 type CameraControl struct {
 	Control
 
 	rootFrame *gtk.Frame
 }
 
+// Root returns the root element of these controls
 func (cc *CameraControl) Root() gtk.IWidget {
 	return cc.rootFrame
 }

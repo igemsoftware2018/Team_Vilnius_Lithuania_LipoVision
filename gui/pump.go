@@ -3,12 +3,13 @@ package gui
 import (
 	"fmt"
 
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 // NewPumpAndRegionContainer creates a box container for
 // both RegionControl and PumpControl
-func NewPumpAndRegionContainer() (gtk.IWidget, *RegionControl, error) {
+func NewPumpAndRegionContainer(device *device.Device) (gtk.IWidget, *RegionControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	if boxErr != nil {
 		return nil, nil, boxErr
@@ -18,19 +19,19 @@ func NewPumpAndRegionContainer() (gtk.IWidget, *RegionControl, error) {
 	if pumpControlErr != nil {
 		return nil, nil, pumpControlErr
 	}
-	box.PackStart(pumpControl.Root(), true, true, 0)
+	box.PackStart(pumpControl.Root(), false, false, 0)
 
 	cameraControl, cameraControlErr := NewCameraConrol()
 	if cameraControlErr != nil {
 		return nil, nil, cameraControlErr
 	}
-	box.PackStart(cameraControl.Root(), true, true, 0)
+	box.PackStart(cameraControl.Root(), false, false, 0)
 
 	region, regionErr := NewRegionControl()
 	if regionErr != nil {
 		return nil, nil, regionErr
 	}
-	box.PackEnd(region.Root(), false, true, 0)
+	box.PackEnd(region.Root(), true, true, 0)
 
 	return box, region, nil
 }

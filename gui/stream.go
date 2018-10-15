@@ -1,12 +1,13 @@
 package gui
 
 import (
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
 
 // NewStreamControl returns the stream widget collection
-func NewStreamControl() (*StreamControl, error) {
+func NewStreamControl(device *device.Device) (*StreamControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	if boxErr != nil {
 		return nil, boxErr
@@ -38,8 +39,8 @@ func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {
 		return nil, nil, comboErr
 	}
 
-	devicesCombo.AppendText("dropletgenomics")
-	devicesCombo.AppendText("video")
+	devicesCombo.AppendText("DropletGenomics")
+	devicesCombo.AppendText("Video file...")
 
 	return devicesLabel, devicesCombo, nil
 }
