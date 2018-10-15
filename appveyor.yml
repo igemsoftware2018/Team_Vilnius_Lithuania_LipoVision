@@ -18,7 +18,6 @@ environment:
 
 cache:
   - C:\opencv -> appveyor_build_opencv.cmd
-  - C:\msys64\mingw64 -> .appveyor/msys_prep.sh
 
 install:
   - rmdir %GOROOT% /s /q
