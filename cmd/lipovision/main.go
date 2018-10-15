@@ -88,7 +88,7 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 
 		go func() {
 			log.WithFields(log.Fields{
-				"device": selection
+				"device": selection,
 			}).Info("Stream processor started")
 			streamCtx, streamCancel := context.WithCancel(mainCtx)
 			deviceStream := activeDevice.Stream(streamCtx)
@@ -108,7 +108,7 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 				}
 			}
 			log.WithFields(log.Fields{
-				"device": selection
+				"device": selection,
 			}).Info("Stream processor exited")
 		}()
 	})

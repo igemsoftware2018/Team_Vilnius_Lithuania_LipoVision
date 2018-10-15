@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
+	log "github.com/sirupsen/logrus"
 )
 
 var client http.Client
