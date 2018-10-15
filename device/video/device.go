@@ -11,7 +11,7 @@ import (
 )
 
 // Create returns a video.Device configured with given setttings
-func Create(videoPath string, framerate int) Device {
+func Create(videoPath string, framerate float64) Device {
 	log.WithFields(log.Fields{
 		"device": "Video",
 	}).Info("video file set as: ", videoPath)
@@ -30,7 +30,7 @@ type Device struct {
 
 // Stream fetches frames on certain times, to mimic stream
 func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
-	stream := make(chan device.Frame, dev.camera.FrameRate)
+	stream := make(chan device.Frame, int(dev.camera.FrameRate))
 
 	capture, err := gocv.VideoCaptureFile(dev.videoPath)
 	if err != nil {
@@ -61,7 +61,7 @@ func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
 					continue
 				}
 				stream <- Frame{frame: img}
-				time.Sleep((time.Duration)((int)(time.Second) / dev.camera.FrameRate))
+				time.Sleep(time.Second / time.Duration(dev.camera.FrameRate))
 			}
 		}
 	}()

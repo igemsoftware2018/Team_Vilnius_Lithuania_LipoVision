@@ -15,6 +15,6 @@ type Pump struct {
 
 // Invoke on a camera's pump does not do anything, it's
 // a camera, it does not have pumps
-func (Pump) Invoke(invoke device.ClientInvocation, data interface{}) error {
+func (Pump) Invoke(invoke device.ClientInvocation, data float64) error {
 	return nil
 }

@@ -18,7 +18,7 @@ func TestAutoAdjust(t *testing.T) {
 
 	camera := dropletgenomics.Camera{BaseAddr: ts.URL}
 
-	if err := camera.Invoke(device.CameraAutoAdjust, nil); err != nil {
+	if err := camera.Invoke(device.CameraAutoAdjust, 0); err != nil {
 		t.Fail()
 	}
 }

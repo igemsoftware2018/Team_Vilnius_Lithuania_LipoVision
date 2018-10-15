@@ -30,14 +30,13 @@ func Create(usedPumps int) *Device {
 	for i := 0; i < usedPumps; i++ {
 		pumps[i] = Pump{BaseAddr: "http://192.168.1.100:8764"}
 	}
-	device := Device{
+	return &Device{
 		pumpExperiment: usedPumps,
 		camera: Camera{
 			BaseAddr: "http://192.168.1.100:8765",
 		},
 		pumps: pumps,
 	}
-	return &device
 }
 
 // Device is DropletGenomics' rendition of microfluidics devices
@@ -159,7 +158,7 @@ func (d Device) Pump(index int) device.Client {
 // RefreshAll launches refresh on all pumps
 func (d Device) RefreshAll() error {
 	for _, pump := range d.pumps {
-		if err := pump.Invoke(device.PumpRefresh, nil); err != nil {
+		if err := pump.Invoke(device.PumpRefresh, 0); err != nil {
 			return err
 		}
 	}

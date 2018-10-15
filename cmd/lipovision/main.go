@@ -16,6 +16,12 @@ var (
 	mainCtx      context.Context
 	mainCancel   context.CancelFunc
 	activeDevice device.Device
+	deviceSet    bool
+)
+
+var (
+	illuminationValue float64
+	exposureValue     float64
 )
 
 func chooseFileCreateDevice(win *gtk.Window) device.Device {
@@ -62,14 +68,27 @@ func main() {
 	win.ShowAll()
 
 	registerDeviceChange(content, win)
-	registerAutoAdjustHandling(content, win)
 
 	gtk.Main()
 }
 
-func registerAutoAdjustHandling(content *gui.MainControl, win *gtk.Window) {
+func registerEventHandling(content *gui.MainControl, win *gtk.Window) {
 	content.Camera.AutoAdjButton.Connect("clicked", func() {
-		activeDevice.Camera().Invoke(device.CameraAutoAdjust, nil)
+		activeDevice.Camera().Invoke(device.CameraAutoAdjust, 0)
+	})
+	content.Camera.IlluminationScale.Connect("format-value", func(scale *gtk.Scale) {
+		value := scale.GetValue()
+		if illuminationValue != value {
+			activeDevice.Camera().Invoke(device.CameraSetIllumination, value)
+			illuminationValue = value
+		}
+	})
+	content.Camera.ExposureScale.Connect("format-value", func(scale *gtk.Scale) {
+		value := scale.GetValue()
+		if exposureValue != value {
+			activeDevice.Camera().Invoke(device.CameraSetExposure, value)
+			exposureValue = value
+		}
 	})
 }
 
@@ -118,5 +137,8 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 				"device": selection,
 			}).Info("Stream processor exited")
 		}()
+		if !deviceSet {
+			registerEventHandling(content, win)
+		}
 	})
 }
