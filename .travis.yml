@@ -15,7 +15,6 @@ cache:
   directories:
     - $HOME/usr
     - $HOME/testdata
-    - /usr/local/Cellar
 
 env:
   global:
@@ -29,6 +28,8 @@ addons:
     - build-essential
     - cmake
     - git
+    - gtk2.0
+    - gtk+3.0
     - libgtk2.0-dev
     - libgtk-3-dev
     - pkg-config
@@ -63,7 +64,7 @@ before_script:
   - ./cc-test-reporter before-build
 script: 
   - go generate ./...
-  - go test  -coverprofile c.out ./...
+  - go test  -tags gtk_3_10 -coverprofile c.out ./...
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 

@@ -12,10 +12,13 @@ environment:
   GOROOT: c:\go
   GOVERSION: 1.10.3
   TEST_EXTERNAL: 1
+  PKG_CONFIG_PATH: C:\msys64\mingw64\lib\pkgconfig
+  CGO_LDFLAGS_ALLOW: -Wl,-luuid
   APPVEYOR_SAVE_CACHE_ON_ERROR: false
 
 cache:
   - C:\opencv -> appveyor_build_opencv.cmd
+  - C:\msys64\mingw64 -> .appveyor/msys_prep.sh
 
 install:
   - if not exist "C:\opencv" appveyor_build_opencv.cmd
@@ -30,25 +33,27 @@ install:
   - go get github.com/golang/mock/gomock
   - go install github.com/golang/mock/mockgen
   - dep ensure
+  - if not exist "C:\opencv" appveyor_build_opencv.cmd
+  - c:\msys64\usr\bin\env MSYSTEM=MINGW64 c:\msys64\usr\bin\bash -l %APPVEYOR_BUILD_FOLDER%\.appveyor\msys_prep.sh
+  - set PATH=C:\Perl\site\bin;C:\Perl\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft\Web Platform Installer\;C:\Tools\PsTools;C:\Program Files (x86)\CMake\bin;C:\go\bin;C:\Tools\NuGet;C:\Program Files\LLVM\bin;C:\Tools\curl\bin;C:\ProgramData\chocolatey\bin;C:\Program Files (x86)\Yarn\bin;C:\Users\appveyor\AppData\Local\Yarn\bin;C:\Program Files\AppVeyor\BuildAgent\
+  - set PATH=%PATH%;C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
+  - set PATH=%PATH%;C:\Tools\GitVersion;C:\Program Files\Git LFS;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\opencv\build\install\x64\mingw\bin;
   - echo %PATH%
   - echo %GOPATH%
   - go version
   - set GOCV_CAFFE_TEST_FILES=C:\opencv\testdata
   - set GOCV_TENSORFLOW_TEST_FILES=C:\opencv\testdata
   - go env
+  - echo %PKG_CONFIG_PATH%
 
 build_script:
+  - echo %PKG_CONFIG_PATH%
+  - set PATH=%PATH%;C:\msys64\mingw64\bin
   - set PATH=%PATH%;%GOPATH%\bin
   - go generate ./...
-  - go test ./...
-  - mkdir build
-  - mkdir pkg
-  - cd assets
-  - windres -o ..\cmd\lipovision\lipovision-res.syso lipovision.rc
-  - cd ..\cmd\lipovision
-  - go build -ldflags "-w -H windowsgui" -o ../../build/LipoVision.exe
-  - cd ../../
-  - (robocopy /COPYALL /E C:/opencv/build/install/x64/mingw/bin/ build/) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+  - go test -tags gtk_3_10 ./...
+  - .appveyor/build_project.cmd
+  - xcopy  C:\opencv\build\install\x64\mingw\bin\* build\ /s /i
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
   - PowerShell -Command "& Get-FileHash pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip -Algorithm MD5 > pkg/lipovision-%APPVEYOR_BUILD_VERSION%.md5"
 

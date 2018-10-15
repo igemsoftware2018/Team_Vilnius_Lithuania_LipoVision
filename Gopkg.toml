@@ -36,3 +36,6 @@
 [[constraint]]
   name = "github.com/golang/mock"
   version = "1.1.1"
+[[constraint]]
+  branch = "master"
+  name = "github.com/gotk3/gotk3"
