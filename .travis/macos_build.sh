@@ -21,7 +21,7 @@ bash .travis/iconset_make.sh $ASSETS
 cp $ASSETS/lipovision.icns $RES_FOLDER
 
 pushd cmd/lipovision
-go build -ldflags '-s -w' -o ../../$BIN_FOLDER/LipoVision
+go build -ldflags '-s -w' -o ../../$BIN_FOLDER/LipoVision -tags gtk_3_10
 popd
 
 cp $OPENCV_BUILD/libopencv_*$OPENCV_POSTFIX $BIN_FOLDER
