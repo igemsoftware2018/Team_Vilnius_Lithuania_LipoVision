@@ -30,10 +30,10 @@ func TestSettables(t *testing.T) {
 		device.CameraSetFrameRate,
 	}
 
-	testRetrievers := []func(c dropletgenomics.Camera) int{
-		func(c dropletgenomics.Camera) int { return c.Illumination },
-		func(c dropletgenomics.Camera) int { return c.Exposure },
-		func(c dropletgenomics.Camera) int { return c.FrameRate },
+	testRetrievers := []func(c dropletgenomics.Camera) float64{
+		func(c dropletgenomics.Camera) float64 { return c.Illumination },
+		func(c dropletgenomics.Camera) float64 { return c.Exposure },
+		func(c dropletgenomics.Camera) float64 { return c.FrameRate },
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func TestSettables(t *testing.T) {
 	defer ts.Close()
 
 	for i, invoke := range testCases {
-		value := 10
+		value := 10.0
 		camera := dropletgenomics.Camera{BaseAddr: ts.URL}
 
 		if err := camera.Invoke(invoke, value); err != nil {

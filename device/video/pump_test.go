@@ -12,15 +12,15 @@ func TestGiveGoodValue(t *testing.T) {
 
 	err := pump.Invoke(device.PumpReset, 0)
 	if err != nil {
-		t.Fail("A mock pump returned an error")
+		t.Error("A mock pump returned an error")
 	}
 }
 
-func TestGiveGoodValue(t *testing.T) {
+func TestGiveBadValue(t *testing.T) {
 	pump := video.NewPump()
 
 	err := pump.Invoke(device.CameraSetFrameRate, 23124)
 	if err != nil {
-		t.Fail("A mock pump returned an error")
+		t.Error("A mock pump returned an error")
 	}
 }

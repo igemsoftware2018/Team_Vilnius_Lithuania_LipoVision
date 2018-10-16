@@ -27,7 +27,7 @@ func TestNonSettables(t *testing.T) {
 	defer ts.Close()
 
 	for _, invoke := range testCases {
-		value := 10
+		value := 10.0
 		pump := dropletgenomics.Pump{BaseAddr: ts.URL}
 
 		if err := pump.Invoke(invoke, value); err != nil {
@@ -72,7 +72,7 @@ func TestRefresh(t *testing.T) {
 	defer ts.Close()
 
 	pump := dropletgenomics.Pump{BaseAddr: ts.URL}
-	if err := pump.Invoke(device.PumpRefresh, nil); err != nil {
+	if err := pump.Invoke(device.PumpRefresh, 0); err != nil {
 		t.Error("invoke failed: ", err)
 		return
 	}
