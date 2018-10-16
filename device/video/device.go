@@ -74,7 +74,7 @@ func (Device) Available() bool {
 	return true
 }
 
-// Return the 'camera'
+// Camera returns the mock camera of this device
 func (dev Device) Camera() device.Client {
 	return dev.camera
 }

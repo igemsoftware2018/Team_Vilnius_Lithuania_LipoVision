@@ -58,7 +58,7 @@ func main() {
 		mainCancel()
 		gtk.MainQuit()
 	})
-	win.SetDefaultSize(890, 500)
+	win.SetDefaultSize(900, 600)
 
 	content, err := gui.NewMainControl()
 	if err != nil {

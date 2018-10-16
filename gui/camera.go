@@ -14,21 +14,10 @@ func NewCameraConrol() (*CameraControl, error) {
 		return nil, boxErr
 	}
 
-	illuminationScale, illuminationScaleErr := gtk.ScaleNewWithRange(
-		gtk.ORIENTATION_HORIZONTAL,
-		0, 100, 1)
-	if illuminationScaleErr != nil {
-		return nil, illuminationScaleErr
+	illuminationScale, exposureScale, pckErr := packNewScales(box)
+	if pckErr != nil {
+		return nil, pckErr
 	}
-	box.PackStart(illuminationScale, true, false, 5)
-
-	exposureScale, exposureScaleErr := gtk.ScaleNewWithRange(
-		gtk.ORIENTATION_HORIZONTAL,
-		0, 100, 1)
-	if exposureScaleErr != nil {
-		return nil, exposureScaleErr
-	}
-	box.PackStart(exposureScale, true, false, 5)
 
 	autoAdjButton, audoAdjButtonErr := gtk.ButtonNewWithLabel("Auto Adjust")
 	if audoAdjButtonErr != nil {
@@ -41,6 +30,38 @@ func NewCameraConrol() (*CameraControl, error) {
 		AutoAdjButton:     autoAdjButton,
 		IlluminationScale: illuminationScale,
 		ExposureScale:     exposureScale}, nil
+}
+
+func packNewScales(box *gtk.Box) (*gtk.Scale, *gtk.Scale, error) {
+	illLabel, illLabelErr := gtk.LabelNew("Illumination")
+	if illLabelErr != nil {
+		return nil, nil, illLabelErr
+	}
+	box.PackStart(illLabel, false, false, 10)
+
+	illuminationScale, illuminationScaleErr := gtk.ScaleNewWithRange(
+		gtk.ORIENTATION_HORIZONTAL,
+		0, 100, 1)
+	if illuminationScaleErr != nil {
+		return nil, nil, illuminationScaleErr
+	}
+	box.PackStart(illuminationScale, true, false, 0)
+
+	expLabel, expLabelErr := gtk.LabelNew("Exposure")
+	if expLabelErr != nil {
+		return nil, nil, expLabelErr
+	}
+	box.PackStart(expLabel, false, false, 10)
+
+	exposureScale, exposureScaleErr := gtk.ScaleNewWithRange(
+		gtk.ORIENTATION_HORIZONTAL,
+		0, 100, 1)
+	if exposureScaleErr != nil {
+		return nil, nil, exposureScaleErr
+	}
+	box.PackStart(exposureScale, true, false, 0)
+
+	return illuminationScale, exposureScale, nil
 }
 
 // CameraControl is a collection of controls for the camera

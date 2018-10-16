@@ -26,6 +26,13 @@ type responseBool struct {
 	Success bool `json:"success"`
 }
 
+func makePayload(parameter string, data float64) map[string][]string {
+	payloadData := make(map[string][]string)
+	payloadData["par"] = []string{parameter}
+	payloadData["value"] = []string{fmt.Sprintf("%d", int(data))}
+	return payloadData
+}
+
 // Invoke performs communications with the device by specific commands
 func (c *Camera) Invoke(invoke device.ClientInvocation, data float64) error {
 	var (
@@ -33,12 +40,10 @@ func (c *Camera) Invoke(invoke device.ClientInvocation, data float64) error {
 		payloadData map[string][]string
 	)
 
-	payloadData = make(map[string][]string)
 	switch invoke {
 	case device.CameraSetExposure:
 		endpoint = c.BaseAddr + "/update"
-		payloadData["par"] = []string{"exposure"}
-		payloadData["value"] = []string{fmt.Sprintf("%d", int(data))}
+		payloadData = makePayload("exposure", data)
 		c.Exposure = data
 		log.WithFields(log.Fields{
 			"device": "DropletGenomics",
@@ -46,8 +51,7 @@ func (c *Camera) Invoke(invoke device.ClientInvocation, data float64) error {
 		}).Info("Exposure set")
 	case device.CameraSetFrameRate:
 		endpoint = c.BaseAddr + "/update"
-		payloadData["par"] = []string{"live_rate"}
-		payloadData["value"] = []string{fmt.Sprintf("%d", int(data))}
+		payloadData = makePayload("live_rate", data)
 		c.FrameRate = data
 		log.WithFields(log.Fields{
 			"device": "DropletGenomics",
@@ -55,8 +59,7 @@ func (c *Camera) Invoke(invoke device.ClientInvocation, data float64) error {
 		}).Info("Framerate set")
 	case device.CameraSetIllumination:
 		endpoint = c.BaseAddr + "/update"
-		payloadData["par"] = []string{"illumination"}
-		payloadData["value"] = []string{fmt.Sprintf("%d", int(data))}
+		payloadData = makePayload("illumination", data)
 		c.Illumination = data
 		log.WithFields(log.Fields{
 			"device": "DropletGenomics",
