@@ -39,14 +39,11 @@ install:
   - set GOCV_CAFFE_TEST_FILES=C:\opencv\testdata
   - set GOCV_TENSORFLOW_TEST_FILES=C:\opencv\testdata
   - go env
-  - echo %PKG_CONFIG_PATH%
 
 build_script:
   - echo %PKG_CONFIG_PATH%
   - set PATH=%PATH%;C:\msys64\mingw64\bin
   - set PATH=%PATH%;%GOPATH%\bin
-  - go generate ./...
-  - go test -tags gtk_3_10 ./...
   - .appveyor/build_project.cmd
   - xcopy  C:\opencv\build\install\x64\mingw\bin\* build\ /s /i /Y
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
