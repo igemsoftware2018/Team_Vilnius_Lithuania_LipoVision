@@ -8,6 +8,7 @@ import (
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device/dropletgenomics"
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device/video"
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/gui"
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/processor"
 	"github.com/gotk3/gotk3/gtk"
 	log "github.com/sirupsen/logrus"
 )
@@ -109,34 +110,16 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 			errDialog.Run()
 		}
 
-		imageStream := make(chan image.Image, 10)
-		go content.StreamControl.ShowStream(imageStream)
-
-		go func() {
-			log.WithFields(log.Fields{
-				"device": selection,
-			}).Info("Stream processor started")
-			streamCtx, streamCancel := context.WithCancel(mainCtx)
-			deviceStream := activeDevice.Stream(streamCtx)
-			defer streamCancel()
-			defer close(imageStream)
-		Process:
-			for {
-				select {
-				case <-streamCtx.Done():
-					break Process
-				case frame, ok := <-deviceStream:
-					if ok {
-						imageStream <- frame.Frame()
-					} else {
-						break Process
-					}
-				}
+		frameHandlers := make(map[string]func(image.Image))
+		frameHandlers[processor.StreamOriginal] = func(frame image.Image) {
+			if err := content.StreamControl.ShowFrame(frame); err != nil {
+				log.Error("Failed to show frame on main window: ", err)
 			}
-			log.WithFields(log.Fields{
-				"device": selection,
-			}).Info("Stream processor exited")
-		}()
+		}
+
+		stream := activeDevice.Stream(mainCtx)
+		processor.NewFrameProcessor().Launch(stream, frameHandlers)
+
 		if !deviceSet {
 			registerEventHandling(content, win)
 		}

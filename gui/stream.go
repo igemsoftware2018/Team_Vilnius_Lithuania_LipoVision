@@ -1,14 +1,11 @@
 package gui
 
 import (
-	"bytes"
 	"image"
-	"image/png"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
-	log "github.com/sirupsen/logrus"
 )
 
 // NewStreamControl returns the stream widget collection
@@ -112,21 +109,7 @@ func (sw *StreamControl) Root() gtk.IWidget {
 	return sw.rootBox
 }
 
-// ShowStream starts a goroutine that updates the image
-func (sw *StreamControl) ShowStream(stream <-chan image.Image) {
-	for frame := range stream {
-		buffer := new(bytes.Buffer)
-		png.Encode(buffer, frame)
-		loader, err := gdk.PixbufLoaderNew()
-		if err != nil {
-			log.Fatal("Failed to create loader for images")
-			return
-		}
-		pixbuf, loadErr := loader.WriteAndReturnPixbuf(buffer.Bytes())
-		if loadErr != nil {
-			log.Warn("Failed to load image onto screen")
-			continue
-		}
-		sw.image.SetFromPixbuf(pixbuf)
-	}
+// ShowFrame sets an image onto the frame window from an image
+func (sw *StreamControl) ShowFrame(frame image.Image) error {
+	return showFrame(sw.image, frame)
 }

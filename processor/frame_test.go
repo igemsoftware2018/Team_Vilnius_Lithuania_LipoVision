@@ -33,7 +33,7 @@ func TestProcess(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	processor := processor.CreateFrameProcessor()
+	proc := processor.CreateFrameProcessor()
 	stream := make(chan device.Frame, 10)
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -47,7 +47,8 @@ func TestProcess(t *testing.T) {
 		mockFrame.EXPECT().Skip().Return(frameCtx.Done())
 		return mockFrame
 	})
-	go processor.Process(ctx, stream)
+
+	proc.Launch(stream, []string{processor.StreamOriginal})
 
 	time.Sleep(50 * time.Millisecond)
 	cancel()
@@ -57,7 +58,7 @@ func TestSkip(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	processor := processor.CreateFrameProcessor()
+	proc := processor.CreateFrameProcessor()
 	stream := make(chan device.Frame, 10)
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -74,7 +75,7 @@ func TestSkip(t *testing.T) {
 	})
 
 	time.Sleep(20 * time.Millisecond)
-	go processor.Process(ctx, stream)
+	proc.Launch(stream, []string{processor.StreamOriginal})
 	time.Sleep(10 * time.Millisecond)
 	cancel()
 }

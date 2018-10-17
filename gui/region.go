@@ -1,6 +1,10 @@
 package gui
 
-import "github.com/gotk3/gotk3/gtk"
+import (
+	"image"
+
+	"github.com/gotk3/gotk3/gtk"
+)
 
 // NewRegionControl creates a control widget
 func NewRegionControl() (*RegionControl, error) {
@@ -15,7 +19,7 @@ func NewRegionControl() (*RegionControl, error) {
 	}
 
 	frame.Add(image)
-	return &RegionControl{rootFrame: frame}, nil
+	return &RegionControl{rootFrame: frame, image: image}, nil
 }
 
 // RegionControl is the cut region widget for reference
@@ -23,9 +27,16 @@ type RegionControl struct {
 	Control
 
 	rootFrame *gtk.Frame
+
+	image *gtk.Image
 }
 
 // Root returns the root element of this control
-func (rc RegionControl) Root() gtk.IWidget {
+func (rc *RegionControl) Root() gtk.IWidget {
 	return rc.rootFrame
+}
+
+// ShowFrame instructs the image container to display given image
+func (rc *RegionControl) ShowFrame(frame image.Image) error {
+	return showFrame(rc.image, frame)
 }

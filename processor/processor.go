@@ -1,11 +1,14 @@
 package processor
 
 import (
-	"context"
+	"image"
 )
 
-// Processor Defines a worker for
+// Processor is a channel (in this case - frame) processing
+// struct and collection of functions
 type Processor interface {
-	// Process Performs a process operation on channel items
-	Process(context.Context, <-chan struct{})
+	// Launch starts an asynchronious processing goroutine and returns all requested frames of processing
+	Launch(<-chan struct{}, map[string]func(image.Image))
+	// Set certain parameters about the Processor
+	Set(string, interface{}) error
 }
