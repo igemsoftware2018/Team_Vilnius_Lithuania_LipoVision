@@ -26,10 +26,12 @@ SettingAutonomicRun - enables the auto-coating feature*/
 const (
 	SettingAutonomicRun string = "auto"
 	SettingRegionIsSet  string = "regionSet"
+	SettingDangerScore  string = "dangerScore"
 )
 
 const (
-	frameQueueSize int = 10
+	frameQueueSize   int = 10
+	detectorTreshold int = 10
 )
 
 // NewFrameProcessor Creates a frame processor with given settings
@@ -54,8 +56,10 @@ func NewFrameProcessor() *FrameProcessor {
 			filter.CreateCvtColorFilter(gocv.ColorBGRToGray),
 			filter.CreateThesholdFilter(125, 255, gocv.ThresholdBinaryInv),
 		},
-		template: templateFetch(),
-		region:   image.Rectangle{},
+		template:    templateFetch(),
+		region:      image.Rectangle{},
+		subtractor:  gocv.NewBackgroundSubtractorKNN(),
+		dangerCount: 0,
 	}
 }
 
@@ -81,10 +85,11 @@ type FrameProcessor struct {
 	regionFilters []filter.Filter
 
 	// Misc
-	subtractor filter.Subtract
-	template   gocv.Mat
-	region     image.Rectangle
-	rectColor  color.RGBA
+	subtractor  gocv.BackgroundSubtractorKNN
+	template    gocv.Mat
+	region      image.Rectangle
+	rectColor   color.RGBA
+	dangerCount int32
 }
 
 func templateFetch() (filteredTemplate gocv.Mat) {
@@ -150,20 +155,108 @@ func (fp *FrameProcessor) Launch(frames <-chan device.Frame, streamHandlers map[
 						"processor": "Frame",
 					}).Error("failed: ", err)
 				}
-				cropped = frame.Region(fp.region)
+				frameRegion := frame.Region(fp.region)
+				cropped = frameRegion.Clone()
 
+				croppedSubtracted := cropped.Clone()
+				fp.subtractor.Apply(croppedSubtracted, &croppedSubtracted)
+
+				if err := filter.ApplyFilters(&cropped, fp.regionFilters); err != nil {
+					log.WithFields(log.Fields{
+						"processor": "Frame",
+					}).Error("failed: ", err)
+					continue
+				}
+
+				furthestLineX := findBiggestXOfWhitePixel(&cropped)
+
+				newCount := countMisbehaviorPixels(croppedSubtracted, furthestLineX)
+				if newCount > 500 {
+					fp.dangerCount = fp.dangerCount + countMisbehaviorPixels(croppedSubtracted, furthestLineX)
+				}
+				log.Info("Danger count: ", fp.dangerCount)
+
+				gocv.AddWeighted(cropped, 1, croppedSubtracted, 1, 0, &cropped)
 			}
 
 			gocv.Rectangle(&original, fp.region, fp.rectColor, 2)
 			invokeIfPresent(streamHandlers, StreamThresholded, &frame)
 			invokeIfPresent(streamHandlers, StreamOriginal, &original)
 			invokeIfPresent(streamHandlers, StreamRegion, &cropped)
+			fp.dangerCount = fp.dangerCount - 20
+			fp.previousFame = &frame
 		}
+		fp.subtractor.Close()
 		log.WithFields(log.Fields{"processor": "Frame"}).Info("Finished")
 	}()
+
 }
 
 // Set the configurables on this Processor
 func (fp *FrameProcessor) Set(id string, value interface{}) {
+	switch id {
+	case SettingRegionIsSet:
+		val, ok := value.(int32)
+		if !ok {
+			panic("frameProcessor cast failed, bad value")
+		}
+		atomic.StoreInt32(&fp.regionIsSet, val)
+	case SettingAutonomicRun:
+		val, ok := value.(int32)
+		if !ok {
+			panic("frameProcessor cast failed, bad value")
+		}
+		atomic.StoreInt32(&fp.autonomicRun, val)
+	case SettingDangerScore:
+		val, ok := value.(int32)
+		if !ok {
+			panic("frameProcessor cast failed, bad value")
+		}
+		atomic.StoreInt32(&fp.dangerCount, val)
+	default:
+		panic("nonexistant value given")
+	}
+}
 
+func (fp *FrameProcessor) Get(id string) int32 {
+	switch id {
+	case SettingRegionIsSet:
+		return atomic.LoadInt32(&fp.regionIsSet)
+	case SettingAutonomicRun:
+		return atomic.LoadInt32(&fp.autonomicRun)
+	case SettingDangerScore:
+		return atomic.LoadInt32(&fp.dangerCount)
+	default:
+		panic("nonexistant value given")
+	}
+}
+
+// Find white pixel with biggest X coordinate
+func findBiggestXOfWhitePixel(cropped *gocv.Mat) (biggestX int) {
+	biggestX = 0
+	for i := 0; i < cropped.Cols(); i++ {
+		for j := 0; j < cropped.Rows(); j++ {
+			if cropped.GetUCharAt(j, i) == 255 {
+				if biggestX < i {
+					biggestX = i
+				}
+
+			}
+		}
+	}
+	return
+}
+
+/* Counts white pixels with bigger X value than outer right vertical line
+   returns true if there are some, false otherwise */
+func countMisbehaviorPixels(cropped gocv.Mat, biggestX int) int32 {
+	dangerPixelsCounter := 0
+	for i := 0; i < cropped.Cols(); i++ {
+		for j := 0; j < cropped.Rows(); j++ {
+			if cropped.GetUCharAt(j, i) == 255 && i > biggestX {
+				dangerPixelsCounter++
+			}
+		}
+	}
+	return int32(dangerPixelsCounter)
 }

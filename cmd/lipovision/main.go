@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"image"
+	"time"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device/dropletgenomics"
@@ -14,10 +15,11 @@ import (
 )
 
 var (
-	mainCtx      context.Context
-	mainCancel   context.CancelFunc
-	activeDevice device.Device
-	deviceSet    bool
+	mainCtx         context.Context
+	mainCancel      context.CancelFunc
+	activeDevice    device.Device
+	deviceSet       bool
+	activeProcessor *processor.FrameProcessor
 )
 
 var (
@@ -91,6 +93,36 @@ func registerEventHandling(content *gui.MainControl, win *gtk.Window) {
 			exposureValue = value
 		}
 	})
+	content.StreamControl.LockButton.Connect("toggled", func(btn *gtk.CheckButton) {
+		if btn.GetActive() {
+			activeProcessor.Set(processor.SettingRegionIsSet, int32(1))
+		} else {
+			activeProcessor.Set(processor.SettingRegionIsSet, int32(0))
+		}
+	})
+	content.StreamControl.LockButton.Connect("toggled", func(btn *gtk.CheckButton) {
+		if btn.GetActive() {
+			activeProcessor.Set(processor.SettingAutonomicRun, int32(1))
+		} else {
+			activeProcessor.Set(processor.SettingAutonomicRun, int32(0))
+		}
+	})
+	content.Pump.Pump(0).Connect("value-changed", func(btn *gtk.SpinButton) {
+		val := btn.GetValue()
+		activeDevice.Pump(0).Invoke(device.PumpSetVolume, float64(val))
+	})
+	content.Pump.Pump(1).Connect("value-changed", func(btn *gtk.SpinButton) {
+		val := btn.GetValue()
+		activeDevice.Pump(1).Invoke(device.PumpSetVolume, float64(val))
+	})
+	content.Pump.Pump(2).Connect("value-changed", func(btn *gtk.SpinButton) {
+		val := btn.GetValue()
+		activeDevice.Pump(2).Invoke(device.PumpSetVolume, float64(val))
+	})
+	content.Pump.Pump(3).Connect("value-changed", func(btn *gtk.SpinButton) {
+		val := btn.GetValue()
+		activeDevice.Pump(3).Invoke(device.PumpSetVolume, float64(val))
+	})
 }
 
 func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
@@ -123,7 +155,33 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 		}
 
 		stream := activeDevice.Stream(mainCtx)
-		processor.NewFrameProcessor().Launch(stream, frameHandlers)
+		activeProcessor = processor.NewFrameProcessor()
+		activeProcessor.Launch(stream, frameHandlers)
+
+		go func() {
+			log.Info("Health monitor started")
+		CheckHealth:
+			for {
+				select {
+				case <-mainCtx.Done():
+					break CheckHealth
+				default:
+				}
+
+				if activeProcessor.Get(processor.SettingAutonomicRun) != 0 {
+					time.Sleep(5 * time.Second)
+					score := activeProcessor.Get(processor.SettingDangerScore)
+					if score > 300 {
+						pump2 := content.Pump.Pump(1).GetValue()
+						pump3 := content.Pump.Pump(2).GetValue()
+
+						content.Pump.Pump(1).SetValue(pump2 + 5)
+						content.Pump.Pump(2).SetValue(pump3 + 5)
+					}
+				}
+			}
+			log.Info("Health monitor finished")
+		}()
 
 		if !deviceSet {
 			registerEventHandling(content, win)

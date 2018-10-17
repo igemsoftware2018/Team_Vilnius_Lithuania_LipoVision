@@ -15,7 +15,7 @@ func NewStreamControl() (*StreamControl, error) {
 		return nil, boxErr
 	}
 
-	optsBox, comboBox, optsErr := newOptionsBox()
+	optsBox, comboBox, lockBtn, autoBtn, optsErr := newOptionsBox()
 	if optsErr != nil {
 		return nil, optsErr
 	}
@@ -27,7 +27,7 @@ func NewStreamControl() (*StreamControl, error) {
 	}
 	box.PackStart(streamWindow, true, true, 0)
 
-	return &StreamControl{rootBox: box, ComboBox: comboBox, image: image}, nil
+	return &StreamControl{rootBox: box, ComboBox: comboBox, image: image, LockButton: lockBtn, AutoButton: autoBtn}, nil
 }
 
 func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {
@@ -47,26 +47,39 @@ func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {
 	return devicesLabel, devicesCombo, nil
 }
 
-func newOptionsBox() (gtk.IWidget, *gtk.ComboBoxText, error) {
+func newOptionsBox() (gtk.IWidget, *gtk.ComboBoxText, *gtk.CheckButton, *gtk.CheckButton, error) {
 	frame, frameErr := gtk.FrameNew("Device options")
 	if frameErr != nil {
-		return nil, nil, frameErr
+		return nil, nil, nil, nil, frameErr
 	}
 
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	if boxErr != nil {
-		return nil, nil, boxErr
+		return nil, nil, nil, nil, boxErr
 	}
 
 	devicesLabel, comboBox, comboBoxErr := packDeviceSelector()
 	if comboBoxErr != nil {
-		return nil, nil, comboBoxErr
+		return nil, nil, nil, nil, comboBoxErr
 	}
 	box.PackStart(devicesLabel, false, false, 0)
 	box.PackStart(comboBox, false, false, 0)
 
+	lockCheckButton, lockCheckErr := gtk.CheckButtonNewWithLabel("Lock region")
+	if lockCheckErr != nil {
+		return nil, nil, nil, nil, lockCheckErr
+	}
+
+	autoCheckButton, autoCheckErr := gtk.CheckButtonNewWithLabel("Auto coating")
+	if autoCheckErr != nil {
+		return nil, nil, nil, nil, autoCheckErr
+	}
+
+	box.PackEnd(autoCheckButton, false, false, 5)
+	box.PackEnd(lockCheckButton, false, true, 5)
+
 	frame.Add(box)
-	return frame, comboBox, nil
+	return frame, comboBox, lockCheckButton, autoCheckButton, nil
 }
 
 func newStreamWindow() (gtk.IWidget, *gtk.Image, error) {
@@ -95,8 +108,10 @@ type StreamControl struct {
 	optionsBox *gtk.Box
 
 	// ComboBox must be accessible
-	ComboBox *gtk.ComboBoxText
-	image    *gtk.Image
+	ComboBox   *gtk.ComboBoxText
+	image      *gtk.Image
+	LockButton *gtk.CheckButton
+	AutoButton *gtk.CheckButton
 
 	// Stream frame loader
 	pixbufLoader *gdk.PixbufLoader
