@@ -5,6 +5,7 @@ package processor_test
 
 import (
 	"context"
+	"image"
 	"testing"
 	"time"
 
@@ -33,7 +34,7 @@ func TestProcess(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	proc := processor.CreateFrameProcessor()
+	proc := processor.NewFrameProcessor()
 	stream := make(chan device.Frame, 10)
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -48,7 +49,8 @@ func TestProcess(t *testing.T) {
 		return mockFrame
 	})
 
-	proc.Launch(stream, []string{processor.StreamOriginal})
+	handlers := make(map[string]func(image.Image))
+	proc.Launch(stream, handlers)
 
 	time.Sleep(50 * time.Millisecond)
 	cancel()
@@ -58,7 +60,7 @@ func TestSkip(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	proc := processor.CreateFrameProcessor()
+	proc := processor.NewFrameProcessor()
 	stream := make(chan device.Frame, 10)
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -75,7 +77,43 @@ func TestSkip(t *testing.T) {
 	})
 
 	time.Sleep(20 * time.Millisecond)
-	proc.Launch(stream, []string{processor.StreamOriginal})
+	handlers := make(map[string]func(image.Image))
+	proc.Launch(stream, handlers)
 	time.Sleep(10 * time.Millisecond)
+	cancel()
+}
+
+func TestRunsHandler(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	proc := processor.NewFrameProcessor()
+	stream := make(chan device.Frame, 10)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	frameGen(ctx, stream, func() device.Frame {
+		frameCtx, frameCancel := context.WithTimeout(ctx, time.Millisecond)
+		mockFrame := mock_device.NewMockFrame(mockCtrl)
+		mockFrame.EXPECT().Frame().Return(nil).Do(func() {
+			frameCancel()
+		})
+		mockFrame.EXPECT().Skip().Do(func() <-chan struct{} {
+			return frameCtx.Done()
+		}).AnyTimes()
+		return mockFrame
+	})
+
+	handlerRunCounter := 0
+
+	handlers := make(map[string]func(image.Image))
+	handlers[processor.StreamOriginal] = func(frame image.Image) {
+		handlerRunCounter++
+	}
+	proc.Launch(stream, handlers)
+	time.Sleep(20 * time.Millisecond)
+
+	if handlerRunCounter != 10 {
+		t.Error("Mismatch between counter and expected value: ", handlerRunCounter)
+	}
 	cancel()
 }

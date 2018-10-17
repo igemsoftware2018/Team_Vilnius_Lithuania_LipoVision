@@ -7,19 +7,27 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+/* These constants define what streams are supported on this Processor.
+StreamRegion     - matched region frame
+StreamSubtracted - full frame that is algorithm-subtracted
+StreamOriginal   - original frame, as it came from device*/
 const (
-	// For identification on witch stream to return
 	StreamRegion     string = "region"
 	StreamSubtracted string = "subtracted"
 	StreamOriginal   string = "origina;"
+)
 
-	// Settings of this Processor
+/* There are the settings that are settable for this Processor
+SettingAutonomicRun - enables the auto-coating feature*/
+const (
 	SettingAutonomicRun string = "auto"
+)
 
+const (
 	frameQueueSize int = 10
 )
 
-// CreateFrameProcessor Creates a frame processor with given settings
+// NewFrameProcessor Creates a frame processor with given settings
 func NewFrameProcessor() *FrameProcessor {
 	log.WithFields(log.Fields{
 		"processor": "Frame",
@@ -56,7 +64,7 @@ func (fp *FrameProcessor) Launch(frames <-chan device.Frame, streamHandlers map[
 	}()
 }
 
-// Set
+// Set the configurables on this Processor
 func Set(id string, value interface{}) {
 
 }
