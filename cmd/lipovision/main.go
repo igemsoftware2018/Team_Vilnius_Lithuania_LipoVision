@@ -59,7 +59,7 @@ func main() {
 		mainCancel()
 		gtk.MainQuit()
 	})
-	win.SetDefaultSize(900, 600)
+	win.SetDefaultSize(850, 550)
 
 	content, err := gui.NewMainControl()
 	if err != nil {
@@ -114,6 +114,11 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 		frameHandlers[processor.StreamOriginal] = func(frame image.Image) {
 			if err := content.StreamControl.ShowFrame(frame); err != nil {
 				log.Error("Failed to show frame on main window: ", err)
+			}
+		}
+		frameHandlers[processor.StreamRegion] = func(frame image.Image) {
+			if err := content.RegionStream.ShowFrame(frame); err != nil {
+				log.Error("Failed to show frame on reference: ", err)
 			}
 		}
 

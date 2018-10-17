@@ -2,25 +2,30 @@ package processor
 
 import (
 	"image"
+	"image/color"
+	"sync/atomic"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/filter"
 	log "github.com/sirupsen/logrus"
+	"gocv.io/x/gocv"
 )
 
 /* These constants define what streams are supported on this Processor.
-StreamRegion     - matched region frame
-StreamSubtracted - full frame that is algorithm-subtracted
-StreamOriginal   - original frame, as it came from device*/
+StreamRegion      - matched region frame
+StreamThresholded - full frame that is thresholded
+StreamOriginal    - original frame, as it came from device*/
 const (
-	StreamRegion     string = "region"
-	StreamSubtracted string = "subtracted"
-	StreamOriginal   string = "origina;"
+	StreamRegion      string = "region"
+	StreamThresholded string = "thresholded"
+	StreamOriginal    string = "original"
 )
 
 /* There are the settings that are settable for this Processor
 SettingAutonomicRun - enables the auto-coating feature*/
 const (
 	SettingAutonomicRun string = "auto"
+	SettingRegionIsSet  string = "regionSet"
 )
 
 const (
@@ -32,14 +37,77 @@ func NewFrameProcessor() *FrameProcessor {
 	log.WithFields(log.Fields{
 		"processor": "Frame",
 	}).Info("Created")
-	return &FrameProcessor{}
+
+	prevFrame := gocv.NewMat()
+	counter := 0
+	return &FrameProcessor{
+		frameCounter: &counter,
+		previousFame: &prevFrame,
+		frameFilters: []filter.Filter{
+			filter.CreateNoiseFilter(&prevFrame, &counter),
+		},
+		regionFilters: []filter.Filter{
+			filter.CreateVerticalFilter(),
+			filter.CreateLineApplyFilter(),
+		},
+		transformFilters: []filter.Filter{
+			filter.CreateCvtColorFilter(gocv.ColorBGRToGray),
+			filter.CreateThesholdFilter(125, 255, gocv.ThresholdBinaryInv),
+		},
+		template: templateFetch(),
+		region:   image.Rectangle{},
+	}
 }
 
 // FrameProcessor Defines a processor for incoming frames of the stream
 type FrameProcessor struct {
 	Processor
 
-	autonomicRun bool
+	// Settings
+	// Some of these are ints instead of bools
+	// to protect thread safety
+	autonomicRun int32
+	regionIsSet  int32
+
+	// Frame threshholding and type filter
+	transformFilters []filter.Filter
+
+	// Full frame filters
+	frameCounter *int
+	previousFame *gocv.Mat
+	frameFilters []filter.Filter
+
+	// Region based filters
+	regionFilters []filter.Filter
+
+	// Misc
+	subtractor filter.Subtract
+	template   gocv.Mat
+	region     image.Rectangle
+	rectColor  color.RGBA
+}
+
+func templateFetch() (filteredTemplate gocv.Mat) {
+	// 50x50 matching intersection template
+	var template = gocv.IMRead("template-intersection.png", gocv.IMWritePngStrategyFiltered)
+	gocv.CvtColor(template, &template, gocv.ColorBGRToGray)
+	gocv.AdaptiveThreshold(template, &template, 255, gocv.AdaptiveThresholdMean, gocv.ThresholdBinaryInv, 31, 2)
+	gocv.Erode(template, &template, gocv.GetStructuringElement(0, image.Pt(3, 3)))
+	return template
+}
+
+func (fp *FrameProcessor) extractAndSendThresholded(recvFrame device.Frame, streamHandlers map[string]func(image.Image)) (gocv.Mat, gocv.Mat, error) {
+	original, decodeErr := gocv.ImageToMatRGB(recvFrame.Frame())
+	if decodeErr != nil {
+		return gocv.Mat{}, gocv.Mat{}, decodeErr
+	}
+
+	frame := original.Clone()
+	if err := filter.ApplyFilters(&frame, fp.transformFilters); err != nil {
+		return gocv.Mat{}, gocv.Mat{}, err
+	}
+
+	return original, frame, nil
 }
 
 // Launch starts a processing goroutine for the stream of frames coming from a device
@@ -47,24 +115,55 @@ func (fp *FrameProcessor) Launch(frames <-chan device.Frame, streamHandlers map[
 	log.WithFields(log.Fields{"processor": "Frame"}).Info("Launched")
 
 	go func() {
-		for frame := range frames {
+		for recvFrame := range frames {
 			select {
-			case <-frame.Skip():
+			case <-recvFrame.Skip():
 				log.WithFields(log.Fields{"processor": "Frame"}).Warn("Frame skip")
 				continue
 			default:
 			}
 
-			frameImage := frame.Frame()
-			if h, ok := streamHandlers[StreamOriginal]; ok {
-				h(frameImage)
+			// Clone so that at least something is shown, and does not crash
+			cropped := fp.template.Clone()
+			original, frame, extractErr := fp.extractAndSendThresholded(recvFrame, streamHandlers)
+			if extractErr != nil {
+				log.WithFields(log.Fields{
+					"processor": "Frame",
+				}).Error("failed to extract: ", extractErr)
 			}
+
+			if atomic.LoadInt32(&fp.regionIsSet) == 0 {
+				fp.rectColor = color.RGBA{255, 255, 255, 0}
+				templateDims := fp.template.Size()
+				regionResult := gocv.NewMat()
+				gocv.MatchTemplate(frame, fp.template, &regionResult, gocv.TmCcoeff, gocv.NewMat())
+				_, _, _, maxLoc := gocv.MinMaxLoc(regionResult)
+				fp.region.Min = maxLoc
+				fp.region.Max = image.Point{X: maxLoc.X + templateDims[0], Y: maxLoc.Y + templateDims[1]}
+				frameRegion := frame.Region(fp.region)
+				cropped = frameRegion.Clone()
+			} else {
+				fp.rectColor = color.RGBA{255, 0, 0, 0}
+
+				if err := filter.ApplyFilters(&frame, fp.frameFilters); err != nil {
+					log.WithFields(log.Fields{
+						"processor": "Frame",
+					}).Error("failed: ", err)
+				}
+				cropped = frame.Region(fp.region)
+
+			}
+
+			gocv.Rectangle(&original, fp.region, fp.rectColor, 2)
+			invokeIfPresent(streamHandlers, StreamThresholded, &frame)
+			invokeIfPresent(streamHandlers, StreamOriginal, &original)
+			invokeIfPresent(streamHandlers, StreamRegion, &cropped)
 		}
 		log.WithFields(log.Fields{"processor": "Frame"}).Info("Finished")
 	}()
 }
 
 // Set the configurables on this Processor
-func Set(id string, value interface{}) {
+func (fp *FrameProcessor) Set(id string, value interface{}) {
 
 }

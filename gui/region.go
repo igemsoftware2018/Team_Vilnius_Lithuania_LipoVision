@@ -13,7 +13,7 @@ func NewRegionControl() (*RegionControl, error) {
 		return nil, frameErr
 	}
 
-	image, imgErr := gtk.ImageNewFromFile("template-intersection.png")
+	image, imgErr := gtk.ImageNew()
 	if imgErr != nil {
 		return nil, imgErr
 	}

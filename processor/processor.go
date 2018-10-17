@@ -2,6 +2,8 @@ package processor
 
 import (
 	"image"
+
+	"gocv.io/x/gocv"
 )
 
 // Processor is a channel (in this case - frame) processing
@@ -11,4 +13,11 @@ type Processor interface {
 	Launch(<-chan struct{}, map[string]func(image.Image))
 	// Set certain parameters about the Processor
 	Set(string, interface{}) error
+}
+
+func invokeIfPresent(handlers map[string]func(image.Image), key string, frame *gocv.Mat) {
+	if handler, ok := handlers[key]; ok {
+		send, _ := frame.ToImage()
+		handler(send)
+	}
 }
