@@ -1,8 +1,6 @@
 package dropletgenomics
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
 )
 
@@ -14,15 +12,9 @@ func MakePayload(setting string, data interface{}) payload {
 
 // MakePost encodes a struct to json and sends a post to url
 // TODO: eliminate use
-func MakePost(url string, contentType string, data interface{}) (*http.Response, error) {
-	reqBody := new(bytes.Buffer)
+func MakePost(url string, data map[string][]string) (*http.Response, error) {
 
-	err := json.NewEncoder(reqBody).Encode(data)
-	if err != nil {
-		return nil, err
-	}
-
-	postResp, err := http.Post(url, contentType, reqBody)
+	postResp, err := http.PostForm(url, data)
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,6 @@ package dropletgenomics_test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,14 +17,15 @@ type TestStr struct {
 
 func TestPost(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resBytes, _ := ioutil.ReadAll(r.Body)
-		text := string(resBytes[:])
+		res := r.FormValue("Success")
+		text := fmt.Sprintf("{\"Success\":\"%s\"}", res)
 		fmt.Fprintln(w, text)
 	}))
 	defer ts.Close()
 
-	testVal := TestStr{Success: "yes"}
-	response, err := dropletgenomics.MakePost(ts.URL, "text/html", testVal)
+	testVal := make(map[string][]string)
+	testVal["Success"] = []string{"yes"}
+	response, err := dropletgenomics.MakePost(ts.URL, testVal)
 	if err != nil {
 		t.Error("failed to make post with: ", err)
 		return
@@ -37,7 +37,7 @@ func TestPost(t *testing.T) {
 		t.Error(err)
 	}
 
-	if strings.Compare(testVal.Success, result.Success) != 0 {
+	if strings.Compare(testVal["Success"][0], result.Success) != 0 {
 		t.Error("mismatch, got: ", result.Success)
 	}
 }

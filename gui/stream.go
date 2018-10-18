@@ -1,6 +1,9 @@
 package gui
 
 import (
+	"image"
+
+	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -12,19 +15,19 @@ func NewStreamControl() (*StreamControl, error) {
 		return nil, boxErr
 	}
 
-	optsBox, comboBox, optsErr := newOptionsBox()
+	optsBox, comboBox, lockBtn, autoBtn, optsErr := newOptionsBox()
 	if optsErr != nil {
 		return nil, optsErr
 	}
 	box.PackStart(optsBox, false, false, 0)
 
-	streamWindow, streamErr := newStreamWindow()
+	streamWindow, image, streamErr := newStreamWindow()
 	if streamErr != nil {
 		return nil, streamErr
 	}
 	box.PackStart(streamWindow, true, true, 0)
 
-	return &StreamControl{rootBox: box, ComboBox: comboBox}, nil
+	return &StreamControl{rootBox: box, ComboBox: comboBox, image: image, LockButton: lockBtn, AutoButton: autoBtn}, nil
 }
 
 func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {
@@ -38,47 +41,60 @@ func packDeviceSelector() (*gtk.Label, *gtk.ComboBoxText, error) {
 		return nil, nil, comboErr
 	}
 
-	devicesCombo.AppendText("dropletgenomics")
-	devicesCombo.AppendText("video")
+	devicesCombo.AppendText("DropletGenomics")
+	devicesCombo.AppendText("Video file...")
 
 	return devicesLabel, devicesCombo, nil
 }
 
-func newOptionsBox() (gtk.IWidget, *gtk.ComboBoxText, error) {
+func newOptionsBox() (gtk.IWidget, *gtk.ComboBoxText, *gtk.CheckButton, *gtk.CheckButton, error) {
 	frame, frameErr := gtk.FrameNew("Device options")
 	if frameErr != nil {
-		return nil, nil, frameErr
+		return nil, nil, nil, nil, frameErr
 	}
 
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	if boxErr != nil {
-		return nil, nil, boxErr
+		return nil, nil, nil, nil, boxErr
 	}
 
 	devicesLabel, comboBox, comboBoxErr := packDeviceSelector()
 	if comboBoxErr != nil {
-		return nil, nil, comboBoxErr
+		return nil, nil, nil, nil, comboBoxErr
 	}
 	box.PackStart(devicesLabel, false, false, 0)
 	box.PackStart(comboBox, false, false, 0)
 
-	frame.Add(box)
-	return frame, comboBox, nil
-}
-
-func newStreamWindow() (gtk.IWidget, error) {
-	frame, frameErr := gtk.FrameNew("Device stream")
-	if frameErr != nil {
-		return nil, frameErr
+	lockCheckButton, lockCheckErr := gtk.CheckButtonNewWithLabel("Lock region")
+	if lockCheckErr != nil {
+		return nil, nil, nil, nil, lockCheckErr
 	}
 
-	image, imgErr := gtk.ImageNewFromFile("template-intersection.png")
+	autoCheckButton, autoCheckErr := gtk.CheckButtonNewWithLabel("Auto coating")
+	if autoCheckErr != nil {
+		return nil, nil, nil, nil, autoCheckErr
+	}
+
+	box.PackEnd(autoCheckButton, false, false, 5)
+	box.PackEnd(lockCheckButton, false, true, 5)
+
+	frame.Add(box)
+	return frame, comboBox, lockCheckButton, autoCheckButton, nil
+}
+
+func newStreamWindow() (gtk.IWidget, *gtk.Image, error) {
+	frame, frameErr := gtk.FrameNew("Device stream")
+	if frameErr != nil {
+		return nil, nil, frameErr
+	}
+
+	image, imgErr := gtk.ImageNew()
 	if imgErr != nil {
-		return nil, imgErr
+		return nil, nil, imgErr
 	}
 
 	frame.Add(image)
-	return frame, nil
+	return frame, image, nil
 }
 
 // StreamControl contains the stream window and device controls
@@ -92,14 +108,23 @@ type StreamControl struct {
 	optionsBox *gtk.Box
 
 	// ComboBox must be accessible
-	ComboBox *gtk.ComboBoxText
-	image    *gtk.Image
+	ComboBox   *gtk.ComboBoxText
+	image      *gtk.Image
+	LockButton *gtk.CheckButton
+	AutoButton *gtk.CheckButton
 
 	// Stream frame loader
 	pixbufLoader *gdk.PixbufLoader
+
+	device device.Device
 }
 
 // Root returns the root widget
 func (sw *StreamControl) Root() gtk.IWidget {
 	return sw.rootBox
+}
+
+// ShowFrame sets an image onto the frame window from an image
+func (sw *StreamControl) ShowFrame(frame image.Image) error {
+	return showFrame(sw.image, frame)
 }

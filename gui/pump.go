@@ -8,26 +8,31 @@ import (
 
 // NewPumpAndRegionContainer creates a box container for
 // both RegionControl and PumpControl
-func NewPumpAndRegionContainer() (gtk.IWidget, *RegionControl, error) {
+func NewPumpAndRegionContainer() (gtk.IWidget, *PumpControl, *CameraControl, *RegionControl, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 5)
 	if boxErr != nil {
-		return nil, nil, boxErr
-	}
-
-	region, regionErr := NewRegionControl()
-	if regionErr != nil {
-		return nil, nil, regionErr
+		return nil, nil, nil, nil, boxErr
 	}
 
 	pumpControl, pumpControlErr := NewPumpControl()
 	if pumpControlErr != nil {
-		return nil, nil, pumpControlErr
+		return nil, nil, nil, nil, pumpControlErr
 	}
+	box.PackStart(pumpControl.Root(), false, false, 0)
 
-	box.PackStart(pumpControl.Root(), true, true, 0)
-	box.PackEnd(region.Root(), false, true, 0)
+	cameraControl, cameraControlErr := NewCameraConrol()
+	if cameraControlErr != nil {
+		return nil, nil, nil, nil, cameraControlErr
+	}
+	box.PackStart(cameraControl.Root(), false, false, 0)
 
-	return box, region, nil
+	region, regionErr := NewRegionControl()
+	if regionErr != nil {
+		return nil, nil, nil, nil, regionErr
+	}
+	box.PackEnd(region.Root(), true, true, 0)
+
+	return box, pumpControl, cameraControl, region, nil
 }
 
 // NewPumpControl returns pump control collection
@@ -42,14 +47,14 @@ func NewPumpControl() (*PumpControl, error) {
 		return nil, frameErr
 	}
 
-	var pumps []gtk.IWidget
+	var pumps []*gtk.SpinButton
 	for i := 0; i < 4; i++ {
-		pump, err := newPumpItem(i + 1)
+		pumpBox, pump, err := newPumpItem(i + 1)
 		if err != nil {
 			return nil, err
 		}
 		pumps = append(pumps, pump)
-		box.PackStart(pump, false, false, 5)
+		box.PackStart(pumpBox, false, false, 5)
 	}
 
 	frame.Add(box)
@@ -57,27 +62,27 @@ func NewPumpControl() (*PumpControl, error) {
 	return &PumpControl{rootBox: frame, pumps: pumps}, nil
 }
 
-func newPumpItem(index int) (gtk.IWidget, error) {
+func newPumpItem(index int) (gtk.IWidget, *gtk.SpinButton, error) {
 	box, boxErr := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	if boxErr != nil {
-		return nil, boxErr
+		return nil, nil, boxErr
 	}
 
 	label, labelErr := gtk.LabelNew(fmt.Sprintf("Pump %d: ", index))
 	if labelErr != nil {
-		return nil, labelErr
+		return nil, nil, labelErr
 	}
 
 	spinbox, spinboxErr := gtk.SpinButtonNewWithRange(-9000, 9000, 5)
 	if spinboxErr != nil {
-		return nil, spinboxErr
+		return nil, nil, spinboxErr
 	}
 	spinbox.SetValue(0)
 
 	box.PackStart(label, false, false, 0)
 	box.PackStart(spinbox, true, true, 0)
 
-	return box, nil
+	return box, spinbox, nil
 }
 
 // PumpControl is the pump control collection
@@ -85,10 +90,15 @@ type PumpControl struct {
 	Control
 
 	rootBox *gtk.Frame
-	pumps   []gtk.IWidget
+	pumps   []*gtk.SpinButton
 }
 
 // Root returns the root stack component
 func (pc *PumpControl) Root() gtk.IWidget {
 	return pc.rootBox
+}
+
+// Pump returns pump by id
+func (pc *PumpControl) Pump(index int) *gtk.SpinButton {
+	return pc.pumps[index]
 }

@@ -3,15 +3,14 @@ package dropletgenomics
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"image/png"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
+	log "github.com/sirupsen/logrus"
 )
 
 var client http.Client
@@ -31,18 +30,19 @@ func Create(usedPumps int) *Device {
 	for i := 0; i < usedPumps; i++ {
 		pumps[i] = Pump{BaseAddr: "http://192.168.1.100:8764"}
 	}
-	device := Device{
+	return &Device{
 		pumpExperiment: usedPumps,
 		camera: Camera{
 			BaseAddr: "http://192.168.1.100:8765",
 		},
 		pumps: pumps,
 	}
-	return &device
 }
 
 // Device is DropletGenomics' rendition of microfluidics devices
 type Device struct {
+	device.Device
+
 	pumpExperiment int
 	pumps          []Pump
 	camera         Camera
@@ -72,34 +72,41 @@ func removeTrail(stream io.ReadCloser) {
 }
 
 // Stream launches async stream decoding of ctx lifetime
-func (Device) Stream(ctx context.Context) <-chan Frame {
+func (Device) Stream(ctx context.Context) <-chan device.Frame {
 	const (
 		streamEndpoint string = "http://192.168.1.100:8765/video_feed"
 		frameRate      int    = 20
 	)
 
-	stream := make(chan Frame, 20)
+	stream := make(chan device.Frame, 20)
 	go func() {
-		complete := false
-		for !complete {
+	Dispatch:
+		for {
 			select {
 			case <-ctx.Done():
-				fmt.Printf("%s\n", "Stream closed")
-				complete = true
+				close(stream)
+				log.WithFields(log.Fields{
+					"device": "DropletGenomics",
+				}).Info("Stream closing")
+				break Dispatch
 			default:
 				response, err := client.Get(streamEndpoint)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "failed to connect to stream: %s\n", err)
+					log.WithFields(log.Fields{
+						"device": "DropletGenomics",
+					}).Warn("Failed to connect to stream")
 					time.Sleep(time.Second)
 					continue
 				}
-				fmt.Printf("%s\n", "Connected to stream")
+				log.WithFields(log.Fields{
+					"device": "DropletGenomics",
+				}).Info("Connected to stream")
 
 				byteStream := response.Body
 				for {
 					img, err := decodeFrame(byteStream)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "decode error: %s", err)
+						log.Warn("Decode error")
 						break
 					}
 
@@ -151,7 +158,7 @@ func (d Device) Pump(index int) device.Client {
 // RefreshAll launches refresh on all pumps
 func (d Device) RefreshAll() error {
 	for _, pump := range d.pumps {
-		if err := pump.Invoke(device.PumpRefresh, nil); err != nil {
+		if err := pump.Invoke(device.PumpRefresh, 0); err != nil {
 			return err
 		}
 	}

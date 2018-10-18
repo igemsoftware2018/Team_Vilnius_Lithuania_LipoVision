@@ -43,7 +43,6 @@ addons:
     - libtiff-dev
     - libjasper-dev
     - libdc1394-22-dev
-    - xvfb
     - python-setuptools
 install:
   - bash .travis/before_install.sh
@@ -64,7 +63,7 @@ before_script:
   - ./cc-test-reporter before-build
 script: 
   - go generate ./...
-  - go test  -tags gtk_3_10 -coverprofile c.out ./...
+  - .travis/run_tests.sh
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success: # Compile a list of changes, tarball everything, make md5 and upload to artifact repo 

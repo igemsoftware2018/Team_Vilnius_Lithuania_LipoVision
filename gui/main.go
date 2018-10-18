@@ -1,6 +1,8 @@
 package gui
 
-import "github.com/gotk3/gotk3/gtk"
+import (
+	"github.com/gotk3/gotk3/gtk"
+)
 
 // NewMainControl makes the widget
 func NewMainControl() (*MainControl, error) {
@@ -15,14 +17,14 @@ func NewMainControl() (*MainControl, error) {
 	}
 	box.PackStart(streamWidget.Root(), true, true, 2)
 
-	pumpAndRegion, regionStream, pumpAndRegionErr := NewPumpAndRegionContainer()
-	if pumpAndRegionErr != nil {
-		return nil, pumpAndRegionErr
+	controlsBox, pump, camera, region, cmplxErr := NewPumpAndRegionContainer()
+	if cmplxErr != nil {
+		return nil, cmplxErr
 	}
-	box.PackEnd(pumpAndRegion, false, true, 2)
+	box.PackEnd(controlsBox, false, true, 2)
 
 	box.ShowAll()
-	return &MainControl{rootBox: box, StreamControl: streamWidget, RegionStream: regionStream}, nil
+	return &MainControl{rootBox: box, StreamControl: streamWidget, RegionStream: region, Camera: camera, Pump: pump}, nil
 }
 
 // MainControl is the root widget of the main window
@@ -32,6 +34,8 @@ type MainControl struct {
 	// Contained elements of main window
 	StreamControl *StreamControl
 	RegionStream  *RegionControl
+	Pump          *PumpControl
+	Camera        *CameraControl
 
 	// HBox is the hozirontal layout
 	// Stream window and device selectors on the left

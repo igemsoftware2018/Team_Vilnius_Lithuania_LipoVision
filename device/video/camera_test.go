@@ -8,8 +8,8 @@ import (
 )
 
 func TestSetsFrameRate(t *testing.T) {
-	expectedVal := 10
-	camera := video.Camera{FrameRate: 20}
+	expectedVal := 10.0
+	camera := video.Camera{FrameRate: 20.0}
 
 	if err := camera.Invoke(device.CameraSetFrameRate, expectedVal); err != nil {
 		t.Error("invoke failed")

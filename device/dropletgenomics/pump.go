@@ -3,6 +3,7 @@ package dropletgenomics
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
 )
@@ -45,26 +46,29 @@ type response struct {
 }
 
 // Invoke performs communications with the device by specific commands
-func (p *Pump) Invoke(invoke device.ClientInvocation, data interface{}) error {
+func (p *Pump) Invoke(invoke device.ClientInvocation, data float64) error {
 	var (
 		endpoint    string
-		payloadData interface{}
+		payloadData map[string][]string
 	)
+
+	payloadData = make(map[string][]string)
+	payloadData["pump"] = []string{fmt.Sprintf("%d", p.PumpID)}
+	payloadData["value"] = []string{fmt.Sprintf("%d", int(data))}
 
 	endpoint = p.BaseAddr + "/update"
 	switch invoke {
 	case device.PumpSetTargetVolume:
-		payloadData = requestBody{Par: "volumeTargetW", Pump: p.PumpID, Value: data}
+		payloadData["par"] = []string{"volumeTargetW"}
 	case device.PumpReset:
-		payloadData = requestBody{Pump: p.PumpID}
 	case device.PumpToggleWithdrawInfuse:
-		payloadData = requestBody{Par: "direction", Pump: p.PumpID, Value: data}
+		payloadData["par"] = []string{"direction"}
 	case device.PumpSetVolume:
-		payloadData = requestBody{Par: "rate", Pump: p.PumpID, Value: data}
+		payloadData["par"] = []string{"rate"}
 	case device.PumpToggle:
-		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
+		payloadData["par"] = []string{"status"}
 	case device.PumpRefresh:
-		payloadData = requestBody{Par: "status", Pump: p.PumpID, Value: data}
+		payloadData["par"] = []string{"status"}
 		endpoint = p.BaseAddr + "/refresh"
 	case device.PumpPurge:
 		// TODO : collect data in GMC
@@ -72,7 +76,7 @@ func (p *Pump) Invoke(invoke device.ClientInvocation, data interface{}) error {
 		panic("incorrect invoke operation of pump client")
 	}
 
-	httpResponse, postErr := MakePost(endpoint, "application/json", payloadData)
+	httpResponse, postErr := MakePost(endpoint, payloadData)
 	if postErr != nil {
 		return postErr
 	}

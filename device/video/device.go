@@ -11,22 +11,26 @@ import (
 )
 
 // Create returns a video.Device configured with given setttings
-func Create(videoPath string, framerate int) Device {
-	log.Info("video file set as: ", videoPath)
-	log.Info("framerate set as: ", framerate)
+func Create(videoPath string, framerate float64) Device {
+	log.WithFields(log.Fields{
+		"device": "Video",
+	}).Info("video file set as: ", videoPath)
+	log.WithFields(log.Fields{
+		"device": "Video",
+	}).Info("framerate set as: ", framerate)
 	return Device{videoPath: videoPath,
-		camera: Camera{FrameRate: framerate}}
+		camera: &Camera{FrameRate: framerate}}
 }
 
 // Device defines a mock device for gocv video retrieval
 type Device struct {
 	videoPath string
-	camera    Camera
+	camera    *Camera
 }
 
 // Stream fetches frames on certain times, to mimic stream
 func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
-	stream := make(chan device.Frame, dev.camera.FrameRate)
+	stream := make(chan device.Frame, int(dev.camera.FrameRate))
 
 	capture, err := gocv.VideoCaptureFile(dev.videoPath)
 	if err != nil {
@@ -37,21 +41,27 @@ func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
 		for {
 			select {
 			case <-ctx.Done():
+				close(stream)
 				break FrameFetch
 			default:
 				frame := gocv.NewMat()
 				if !capture.Read(&frame) {
-					log.Warn("could not read frame from video")
-					continue
+					close(stream)
+					log.WithFields(log.Fields{
+						"device": "Video",
+					}).Info("Video device stream closed")
+					break FrameFetch
 				}
 
 				img, err := frame.ToImage()
 				if err != nil {
-					log.Warn("could not convert gocv.Mat to image.Image")
+					log.WithFields(log.Fields{
+						"device": "Video",
+					}).Warn("could not convert gocv.Mat to image.Image")
 					continue
 				}
 				stream <- Frame{frame: img}
-				time.Sleep((time.Duration)((int)(time.Second) / dev.camera.FrameRate))
+				time.Sleep(time.Second / time.Duration(dev.camera.FrameRate))
 			}
 		}
 	}()
@@ -62,4 +72,14 @@ func (dev Device) Stream(ctx context.Context) <-chan device.Frame {
 // a video file is always reachable
 func (Device) Available() bool {
 	return true
+}
+
+// Camera returns the mock camera of this device
+func (dev Device) Camera() device.Client {
+	return dev.camera
+}
+
+// Pump returns a fake pump no matter what
+func (dev Device) Pump(index int) device.Client {
+	return NewPump()
 }

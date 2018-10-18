@@ -79,6 +79,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/golang/mock/gomock",
+    "github.com/gotk3/gotk3/gdk",
     "github.com/gotk3/gotk3/gtk",
     "github.com/sirupsen/logrus",
     "gocv.io/x/gocv",

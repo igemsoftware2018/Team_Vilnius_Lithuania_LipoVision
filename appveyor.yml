@@ -18,7 +18,6 @@ environment:
 
 cache:
   - C:\opencv -> appveyor_build_opencv.cmd
-  - C:\msys64\mingw64 -> .appveyor/msys_prep.sh
 
 install:
   - rmdir %GOROOT% /s /q
@@ -49,7 +48,7 @@ build_script:
   - go generate ./...
   - go test -tags gtk_3_10 ./...
   - .appveyor/build_project.cmd
-  - xcopy  C:\opencv\build\install\x64\mingw\bin\* build\ /s /i
+  - xcopy  C:\opencv\build\install\x64\mingw\bin\* build\ /s /i /Y
   - PowerShell -Command "& Compress-Archive -Path build/* -DestinationPath pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip"
   - PowerShell -Command "& Get-FileHash pkg/lipovision-%APPVEYOR_BUILD_VERSION%.zip -Algorithm MD5 > pkg/lipovision-%APPVEYOR_BUILD_VERSION%.md5"
 
