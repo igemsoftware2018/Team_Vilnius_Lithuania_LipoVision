@@ -56,10 +56,11 @@ func NewFrameProcessor() *FrameProcessor {
 			filter.CreateCvtColorFilter(gocv.ColorBGRToGray),
 			filter.CreateThesholdFilter(125, 255, gocv.ThresholdBinaryInv),
 		},
-		template:    templateFetch(),
-		region:      image.Rectangle{},
-		subtractor:  gocv.NewBackgroundSubtractorKNN(),
-		dangerCount: 0,
+		template:     templateFetch(),
+		region:       image.Rectangle{},
+		subtractor:   gocv.NewBackgroundSubtractorKNN(),
+		dangerCount:  0,
+		autonomicRun: 0,
 	}
 }
 
@@ -171,7 +172,7 @@ func (fp *FrameProcessor) Launch(frames <-chan device.Frame, streamHandlers map[
 				furthestLineX := findBiggestXOfWhitePixel(&cropped)
 
 				newCount := countMisbehaviorPixels(croppedSubtracted, furthestLineX)
-				if newCount > 500 {
+				if newCount < 500 {
 					fp.dangerCount = fp.dangerCount + countMisbehaviorPixels(croppedSubtracted, furthestLineX)
 				}
 				log.Info("Danger count: ", fp.dangerCount)
@@ -183,7 +184,11 @@ func (fp *FrameProcessor) Launch(frames <-chan device.Frame, streamHandlers map[
 			invokeIfPresent(streamHandlers, StreamThresholded, &frame)
 			invokeIfPresent(streamHandlers, StreamOriginal, &original)
 			invokeIfPresent(streamHandlers, StreamRegion, &cropped)
-			fp.dangerCount = fp.dangerCount - 20
+			if fp.dangerCount > 100 {
+				fp.dangerCount = fp.dangerCount - 100
+			} else {
+				fp.dangerCount = 0
+			}
 			fp.previousFame = &frame
 		}
 		fp.subtractor.Close()

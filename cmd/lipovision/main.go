@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"image"
+	"os"
 	"time"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
@@ -100,7 +102,7 @@ func registerEventHandling(content *gui.MainControl, win *gtk.Window) {
 			activeProcessor.Set(processor.SettingRegionIsSet, int32(0))
 		}
 	})
-	content.StreamControl.LockButton.Connect("toggled", func(btn *gtk.CheckButton) {
+	content.StreamControl.AutoButton.Connect("toggled", func(btn *gtk.CheckButton) {
 		if btn.GetActive() {
 			activeProcessor.Set(processor.SettingAutonomicRun, int32(1))
 		} else {
@@ -159,9 +161,15 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 		activeProcessor.Launch(stream, frameHandlers)
 
 		go func() {
+			file, err := os.Create("~/experiment_data.csv")
+			fmt.Printf("%v", err)
+			defer file.Close()
+			fmt.Fprintf(file, "%s;%s;%s;%s;%s;%s", "timestamp", "pump1", "pump2", "pump3", "pump4", "score")
+
 			log.Info("Health monitor started")
 		CheckHealth:
 			for {
+				time.Sleep(1 * time.Second)
 				select {
 				case <-mainCtx.Done():
 					break CheckHealth
@@ -169,11 +177,15 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 				}
 
 				if activeProcessor.Get(processor.SettingAutonomicRun) != 0 {
-					time.Sleep(5 * time.Second)
 					score := activeProcessor.Get(processor.SettingDangerScore)
 					if score > 300 {
+						pump1 := content.Pump.Pump(0).GetValue()
 						pump2 := content.Pump.Pump(1).GetValue()
 						pump3 := content.Pump.Pump(2).GetValue()
+						pump4 := content.Pump.Pump(3).GetValue()
+
+						now := time.Now()
+						fmt.Fprintf(file, "%s;%d;%d;%d;%d;%d", now.Format("20060102150405"), pump1, pump2, pump3, pump4, score)
 
 						content.Pump.Pump(1).SetValue(pump2 + 5)
 						content.Pump.Pump(2).SetValue(pump3 + 5)
