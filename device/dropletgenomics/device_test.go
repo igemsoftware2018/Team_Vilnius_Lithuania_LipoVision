@@ -1,3 +1,4 @@
+//go:generate go-bindata -o template.go template-intersection.png
 package dropletgenomics_test
 
 import (

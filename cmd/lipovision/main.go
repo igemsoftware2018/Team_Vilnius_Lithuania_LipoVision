@@ -1,9 +1,12 @@
+//go:generate go-bindata template-intersection.png
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"image"
+	"image/png"
 	"os"
 	"runtime/pprof"
 	"time"
@@ -31,6 +34,16 @@ var (
 	illuminationValue float64
 	exposureValue     float64
 )
+
+func getTemplateImage() image.Image {
+	imgBytes := MustAsset("template-intersection.png")
+	img, imgErr := png.Decode(bytes.NewBuffer(imgBytes))
+	if imgErr != nil {
+		panic(imgErr)
+	}
+
+	return img
+}
 
 func chooseFileCreateDevice(win *gtk.Window) device.Device {
 	chooser, err := gtk.FileChooserDialogNewWith1Button(
@@ -170,7 +183,7 @@ func registerDeviceChange(content *gui.MainControl, win *gtk.Window) {
 		}
 
 		stream := activeDevice.Stream(mainCtx)
-		activeProcessor = processor.NewFrameProcessor()
+		activeProcessor = processor.NewFrameProcessor(getTemplateImage())
 		activeProcessor.Launch(stream, frameHandlers)
 
 		go func() {

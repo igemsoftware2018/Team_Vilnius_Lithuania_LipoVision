@@ -1,3 +1,4 @@
+//go:generate go-bindata -pkg processor template-intersection.png
 //go:generate mockgen -destination mock_image/mock_image.go image Image
 //go:generate mockgen -destination mock_device/mock_device.go github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device Frame
 //go:generate mockgen -destination mock_filter/mock_filter.go github.com/Vilnius-Lithuania-iGEM-2018/lipovision/filter Filter
