@@ -185,7 +185,7 @@ func (fp *FrameProcessor) Launch(frames <-chan device.Frame, streamHandlers map[
 			invokeIfPresent(streamHandlers, StreamOriginal, &original)
 			invokeIfPresent(streamHandlers, StreamRegion, &cropped)
 			if fp.dangerCount > 100 {
-				fp.dangerCount = fp.dangerCount - 100
+				fp.dangerCount = fp.dangerCount - 50
 			} else {
 				fp.dangerCount = 0
 			}

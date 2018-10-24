@@ -13,6 +13,10 @@ func init() {
 	gtk.Init(nil)
 }
 
+var encoder png.Encoder = png.Encoder{
+	CompressionLevel: png.NoCompression,
+}
+
 // Control is the interface for collections of widgets
 type Control interface {
 	// Root returns gotk3 type of widget
@@ -22,7 +26,7 @@ type Control interface {
 
 func showFrame(cnt *gtk.Image, frame image.Image) error {
 	buffer := new(bytes.Buffer)
-	png.Encode(buffer, frame)
+	encoder.Encode(buffer, frame)
 
 	loader, err := gdk.PixbufLoaderNew()
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/Vilnius-Lithuania-iGEM-2018/lipovision/device"
+	log "github.com/sirupsen/logrus"
 )
 
 type dataPack struct {
@@ -75,6 +76,8 @@ func (p *Pump) Invoke(invoke device.ClientInvocation, data float64) error {
 	default:
 		panic("incorrect invoke operation of pump client")
 	}
+
+	log.WithFields(log.Fields{"device": "DropletGenomics", "PumpID": p.PumpID, "Parameter": payloadData["par"], "data": data}).Info("Invoke called")
 
 	httpResponse, postErr := MakePost(endpoint, payloadData)
 	if postErr != nil {
